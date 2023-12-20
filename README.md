@@ -1,1 +1,1 @@
-# About Ming[About Ming](https://www.minglin.vip/)
+# [About Ming](https://www.minglin.vip/)
