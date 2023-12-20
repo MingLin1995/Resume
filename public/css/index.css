@@ -61,6 +61,12 @@ body {
   margin-top: 20px;
 }
 
+.social-links .email-link:hover {
+  background-color: #555; /* 暗色背景 */
+  color: #fff; /* 白色文字 */
+  transition: background-color 0.3s, color 0.3s; /* 平滑過渡效果 */
+}
+
 .email {
   display: block;
   margin-top: 40px;
