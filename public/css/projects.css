@@ -1,0 +1,28 @@
+.projects-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.project-item {
+  width: 300px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.project-thumbnail {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.project-links a {
+  text-decoration: none;
+  color: #333;
+  margin-right: 10px;
+}
