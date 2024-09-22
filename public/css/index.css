@@ -49,6 +49,7 @@ body {
   margin: 0 10px;
   color: #333;
   font-size: 24px;
+  text-decoration: none; /* 添加這行來移除所有底線 */
 }
 
 .social-links .email-link {
@@ -65,6 +66,11 @@ body {
   background-color: #555; /* 暗色背景 */
   color: #fff; /* 白色文字 */
   transition: background-color 0.3s, color 0.3s; /* 平滑過渡效果 */
+}
+
+.social-links .resume-link {
+  display: inline-flex; /* 使用 inline-flex 來對齊圖標和文字 */
+  align-items: center; /* 垂直居中對齊 */
 }
 
 .email {
