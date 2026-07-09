@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,6 +7,10 @@
     <link rel="icon" type="image/png" href="/img/icon.png" />
     <link rel="stylesheet" href="../css/index.css" />
     <link rel="stylesheet" href="../css/projects.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
   </head>
   <body>
     <div class="projects-header">
@@ -30,19 +34,47 @@
         <h2 class="section-title">Project</h2>
         <div class="projects-container">
           <div class="project-item">
-            <img
-              src="/img/Crypto Sniper.png"
-              alt="Project 1"
-              class="project-thumbnail"
-            />
-            <h3>Crypto-Sniper</h3>
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/CryptoSniperV2.jpg"
+                alt="Crypto-Sniper V2"
+                class="project-thumbnail"
+              />
+            </div>
+            <h3>Crypto-Sniper V2</h3>
             <div class="project-links">
-              <a href="https://crypto-sniper.minglin.vip" target="_blank"
+              <a href="https://crypto-sniper.minglin.net/" target="_blank"
                 ><img
                   src="../img/CryptoSniper.png"
                   alt="demo"
                   style="max-width: 30px; height: auto"
               /></a>
+              <a
+                href="https://github.com/MingLin1995/crypto-sniper-v2"
+                target="_blank"
+                ><img
+                  src="../img/github.png"
+                  alt="github"
+                  style="max-width: 30px; height: auto"
+              /></a>
+            </div>
+            <p>
+              An upgraded automated crypto tracking dashboard. Features
+              optimized live data fetching from Binance REST API, Redis caching,
+              robust Docker containerization, NestJS backend, and multi-platform
+              OAuth (Discord, Google, Telegram) integrations.
+            </p>
+          </div>
+          <div class="project-item">
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/Crypto Sniper.png"
+                alt="Crypto-Sniper V1"
+                class="project-thumbnail"
+              />
+            </div>
+            <h3>Crypto-Sniper (V1)</h3>
+            <div class="project-links">
               <a
                 href="https://github.com/MingLin1995/CryptoSniper"
                 target="_blank"
@@ -59,19 +91,15 @@
             </p>
           </div>
           <div class="project-item">
-            <img
-              src="/img/台北一日遊.png"
-              alt="Project 1"
-              class="project-thumbnail"
-            />
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/台北一日遊.png"
+                alt="Taipei-day-trip"
+                class="project-thumbnail"
+              />
+            </div>
             <h3>Taipei-day-trip</h3>
             <div class="project-links">
-              <a href="https://taipei-day-trip.minglin.vip/" target="_blank"
-                ><img
-                  src="../img/101.png"
-                  alt="demo"
-                  style="max-width: 30px; height: auto"
-              /></a>
               <a
                 href="https://github.com/MingLin1995/taipei-day-trip"
                 target="_blank"
@@ -93,11 +121,13 @@
         <h2 class="section-title">Freelance</h2>
         <div class="projects-container">
           <div class="project-item">
-            <img
-              src="/img/診所預約系統.jpeg"
-              alt="診所預約系統"
-              class="project-thumbnail"
-            />
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/診所預約系統.jpeg"
+                alt="診所預約系統"
+                class="project-thumbnail"
+              />
+            </div>
             <h3>LINE Bot Appointment System</h3>
             <div class="project-links">
               <a href="https://line.me/R/ti/p/@027xpzxy" target="_blank"
@@ -115,11 +145,13 @@
             </p>
           </div>
           <div class="project-item">
-            <img
-              src="/img/討論室預約系統.jpeg"
-              alt="討論室預約系統"
-              class="project-thumbnail"
-            />
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/討論室預約系統.jpeg"
+                alt="討論室預約系統"
+                class="project-thumbnail"
+              />
+            </div>
             <h3>Discussion Room Reservation System</h3>
             <div class="project-links">
               <a href="https://room.iam.ntu.edu.tw/landing" target="_blank"
@@ -136,11 +168,13 @@
             </p>
           </div>
           <div class="project-item">
-            <img
-              src="/img/社畜請上車.jpeg"
-              alt="社畜請上車"
-              class="project-thumbnail"
-            />
+            <div class="thumbnail-wrapper">
+              <img
+                src="/img/社畜請上車.jpeg"
+                alt="社畜請上車"
+                class="project-thumbnail"
+              />
+            </div>
             <h3>Interactive Game Campaign Page</h3>
             <div class="project-links">
               <a href="https://bowlcutlife2025.ttshow.tw/" target="_blank"
@@ -161,5 +195,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="image-lightbox" class="lightbox">
+      <span class="lightbox-close">&times;</span>
+      <img class="lightbox-content" id="lightbox-img" src="" alt="Zoomed Image" />
+    </div>
+
+    <script src="../js/projects.js"></script>
   </body>
 </html>

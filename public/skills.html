@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -26,17 +26,22 @@
     </header>
 
     <div class="skills-container">
+      <!-- Backend Skills -->
       <section class="skill-category">
         <h2 class="category-toggle">
           Backend Skills <span class="toggle-icon">+</span>
         </h2>
         <div class="skills-grid">
           <div class="skill-subcategory">
-            <h3>Languages</h3>
+            <h3>Languages & Runtimes</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/node.png" alt="Node.js" class="skill-icon" />
                 <p>Node.js</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/Bun.png" alt="Bun" class="skill-icon" />
+                <p>Bun</p>
               </div>
               <div class="skill-item">
                 <img
@@ -114,7 +119,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>ORM & ODM</h3>
+            <h3>ORMs & Testing</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/prisma.png" alt="Prisma" class="skill-icon" />
@@ -128,159 +133,255 @@
                 />
                 <p>Mongoose</p>
               </div>
-            </div>
-          </div>
-
-          <div class="skill-subcategory">
-            <h3>Testing</h3>
-            <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/jest.png" alt="Jest" class="skill-icon" />
                 <p>Jest</p>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
+      <!-- DevOps Skills -->
+      <section class="skill-category">
+        <h2 class="category-toggle">
+          DevOps Skills <span class="toggle-icon">+</span>
+        </h2>
+        <div class="skills-grid">
           <div class="skill-subcategory">
-            <h3>Other</h3>
+            <h3>Cloud Providers & Services</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
-                <img src="/img/api.png" alt="RESTful API" class="skill-icon" />
-                <p>RESTful API</p>
+                <img src="/img/aws.png" alt="AWS" class="skill-icon" />
+                <p>AWS</p>
               </div>
               <div class="skill-item">
-                <img src="/img/MVC.png" alt="MVC" class="skill-icon" />
-                <p>MVC</p>
+                <img src="/img/ec2.jpeg" alt="EC2" class="skill-icon" />
+                <p>AWS-EC2</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/s3.svg" alt="S3" class="skill-icon" />
+                <p>AWS-S3</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/Lambda.png" alt="Lambda" class="skill-icon" />
+                <p>AWS-Lambda</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/AWS-VPC.png" alt="VPC" class="skill-icon" />
+                <p>AWS-VPC</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/cloudfront.svg"
+                  alt="CloudFront"
+                  class="skill-icon"
+                />
+                <p>AWS-CloudFront</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/RDS.png" alt="RDS" class="skill-icon" />
+                <p>AWS-RDS</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/GCP.png" alt="GCP" class="skill-icon" />
+                <p>GCP</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/GCP-Cloud Run.svg"
+                  alt="GCP-Cloud Run"
+                  class="skill-icon"
+                />
+                <p>GCP-Cloud Run</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/GCP-Cloud SQL.png"
+                  alt="GCP-Cloud SQL"
+                  class="skill-icon"
+                />
+                <p>GCP-Cloud SQL</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/GCP-Cloud Storage.png"
+                  alt="GCP-Cloud Storage"
+                  class="skill-icon"
+                />
+                <p>GCP-Cloud Storage</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="skill-subcategory">
+            <h3>Containerization & Servers</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img src="/img/docker.png" alt="Docker" class="skill-icon" />
+                <p>Docker</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/docker compose.png"
+                  alt="Docker Compose"
+                  class="skill-icon"
+                />
+                <p>Docker Compose</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/nginx.png" alt="Nginx" class="skill-icon" />
+                <p>Nginx</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/Traefik.png" alt="Traefik" class="skill-icon" />
+                <p>Traefik</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="skill-subcategory">
+            <h3>CI/CD & Version Control</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img src="/img/git.png" alt="Git" class="skill-icon" />
+                <p>Git</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/github.png" alt="GitHub" class="skill-icon" />
+                <p>GitHub</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/gitlab.png" alt="GitLab" class="skill-icon" />
+                <p>GitLab</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/GitHubActions.png"
+                  alt="GitHub Actions"
+                  class="skill-icon"
+                />
+                <p>GitHub Actions</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="skill-subcategory">
+            <h3>Security & DNS</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img
+                  src="/img/cloudflare.png"
+                  alt="Cloudflare"
+                  class="skill-icon"
+                />
+                <p>Cloudflare</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/SSL.png"
+                  alt="Let's Encrypt"
+                  class="skill-icon"
+                />
+                <p>Let's Encrypt</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="skill-subcategory">
+            <h3>Operating Systems</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img src="/img/linux.png" alt="Linux" class="skill-icon" />
+                <p>Linux</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/ubuntu.png" alt="Ubuntu" class="skill-icon" />
+                <p>Ubuntu</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="skill-category">
-        <h2 class="category-toggle">
-          DevOps Skills <span class="toggle-icon">+</span>
-        </h2>
-        <div class="skills-grid">
-          <div class="skill-item">
-            <img src="/img/aws.png" alt="AWS" class="skill-icon" />
-            <p>AWS</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/ec2.jpeg" alt="EC2" class="skill-icon" />
-            <p>EC2</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/s3.svg" alt="S3" class="skill-icon" />
-            <p>S3</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/Lambda.png" alt="Lambda" class="skill-icon" />
-            <p>Lambda</p>
-          </div>
-          <div class="skill-item">
-            <img
-              src="/img/cloudfront.svg"
-              alt="CloudFront"
-              class="skill-icon"
-            />
-            <p>CloudFront</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/RDS.png" alt="RDS" class="skill-icon" />
-            <p>RDS</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/GCP.png" alt="GCP" class="skill-icon" />
-            <p>GCP</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/docker.png" alt="Docker" class="skill-icon" />
-            <p>Docker</p>
-          </div>
-          <div class="skill-item">
-            <img
-              src="/img/docker compose.png"
-              alt="Docker Compose"
-              class="skill-icon"
-            />
-            <p>Docker Compose</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/git.png" alt="Git" class="skill-icon" />
-            <p>Git</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/github.png" alt="GitHub" class="skill-icon" />
-            <p>GitHub</p>
-          </div>
-          <div class="skill-item">
-            <img
-              src="/img/GitHubActions.png"
-              alt="GitHub Actions"
-              class="skill-icon"
-            />
-            <p>GitHub Actions</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/gitlab.png" alt="GitLab" class="skill-icon" />
-            <p>GitLab</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/linux.png" alt="Linux" class="skill-icon" />
-            <p>Linux</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/ubuntu.png" alt="Ubuntu" class="skill-icon" />
-            <p>Ubuntu</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/nginx.png" alt="Nginx" class="skill-icon" />
-            <p>Nginx</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/SSL.png" alt="Let's Encrypt" class="skill-icon" />
-            <p>Let's Encrypt</p>
-          </div>
-        </div>
-      </section>
-
+      <!-- Frontend Skills -->
       <section class="skill-category">
         <h2 class="category-toggle">
           Frontend Skills <span class="toggle-icon">+</span>
         </h2>
         <div class="skills-grid">
-          <div class="skill-item">
-            <img src="/img/React.png" alt="React" class="skill-icon" />
-            <p>React</p>
+          <div class="skill-subcategory">
+            <h3>Languages</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img src="/img/JS.png" alt="JavaScript" class="skill-icon" />
+                <p>JavaScript</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/HTML.png" alt="HTML" class="skill-icon" />
+                <p>HTML</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/CSS.png" alt="CSS" class="skill-icon" />
+                <p>CSS</p>
+              </div>
+            </div>
           </div>
-          <div class="skill-item">
-            <img
-              src="/img/Tailwind CSS.png"
-              alt="Tailwind CSS"
-              class="skill-icon"
-            />
-            <p>Tailwind CSS</p>
+
+          <div class="skill-subcategory">
+            <h3>Frameworks & Libraries</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img src="/img/React.png" alt="React" class="skill-icon" />
+                <p>React</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/Next.js.png" alt="Next.js" class="skill-icon" />
+                <p>Next.js</p>
+              </div>
+              <div class="skill-item">
+                <img src="/img/remix-js.png" alt="Remix" class="skill-icon" />
+                <p>Remix</p>
+              </div>
+            </div>
           </div>
-          <div class="skill-item">
-            <img src="/img/Next.js.png" alt="Next.js" class="skill-icon" />
-            <p>Next.js</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/HTML.png" alt="HTML" class="skill-icon" />
-            <p>HTML</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/CSS.png" alt="CSS" class="skill-icon" />
-            <p>CSS</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/JS.png" alt="JavaScript" class="skill-icon" />
-            <p>JavaScript</p>
-          </div>
-          <div class="skill-item">
-            <img src="/img/Bootstrap.png" alt="Bootstrap" class="skill-icon" />
-            <p>Bootstrap</p>
+
+          <div class="skill-subcategory">
+            <h3>CSS & UI Libraries</h3>
+            <div class="skills-subgrid">
+              <div class="skill-item">
+                <img
+                  src="/img/Tailwind CSS.png"
+                  alt="Tailwind CSS"
+                  class="skill-icon"
+                />
+                <p>Tailwind CSS</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/shadcn-ui.svg"
+                  alt="Shadcn UI"
+                  class="skill-icon"
+                />
+                <p>Shadcn UI</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/material-ui.png"
+                  alt="Material-ui"
+                  class="skill-icon"
+                />
+                <p>Material UI</p>
+              </div>
+              <div class="skill-item">
+                <img
+                  src="/img/Bootstrap.png"
+                  alt="Bootstrap"
+                  class="skill-icon"
+                />
+                <p>Bootstrap</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
