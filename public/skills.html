@@ -7,6 +7,10 @@
     <link rel="icon" type="image/png" href="/img/icon.png" />
     <link rel="stylesheet" href="../css/index.css" />
     <link rel="stylesheet" href="../css/skills.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
   </head>
   <body>
     <header>
@@ -18,9 +22,15 @@
             style="max-width: 30px; height: auto"
           />
         </a>
-        <div class="top-nav-links">
-          <a href="/projects">Projects</a>
-          <a href="/skills">Skills</a>
+        <div class="top-nav-actions">
+          <div class="top-nav-links">
+            <a href="/projects" data-i18n="nav_projects">Projects</a>
+            <a href="/skills" data-i18n="nav_skills">Skills</a>
+          </div>
+          <button id="lang-toggle-btn" class="lang-toggle-btn" aria-label="Toggle language">
+            <i class="fas fa-globe"></i>
+            <span class="lang-toggle-label">繁體中文</span>
+          </button>
         </div>
       </div>
     </header>
@@ -29,11 +39,11 @@
       <!-- Backend Skills -->
       <section class="skill-category">
         <h2 class="category-toggle">
-          Backend Skills <span class="toggle-icon">+</span>
+          <span data-i18n="skill_cat_backend">Backend Skills</span> <span class="toggle-icon">+</span>
         </h2>
         <div class="skills-grid">
           <div class="skill-subcategory">
-            <h3>Languages & Runtimes</h3>
+            <h3 data-i18n="skill_sub_lang_runtime">Languages & Runtimes</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/node.png" alt="Node.js" class="skill-icon" />
@@ -59,7 +69,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Frameworks</h3>
+            <h3 data-i18n="skill_sub_frameworks">Frameworks</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/nestjs.png" alt="NestJS" class="skill-icon" />
@@ -81,7 +91,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Databases</h3>
+            <h3 data-i18n="skill_sub_databases">Databases</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img
@@ -119,7 +129,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>ORMs & Testing</h3>
+            <h3 data-i18n="skill_sub_orm_testing">ORMs & Testing</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/prisma.png" alt="Prisma" class="skill-icon" />
@@ -145,11 +155,11 @@
       <!-- DevOps Skills -->
       <section class="skill-category">
         <h2 class="category-toggle">
-          DevOps Skills <span class="toggle-icon">+</span>
+          <span data-i18n="skill_cat_devops">DevOps Skills</span> <span class="toggle-icon">+</span>
         </h2>
         <div class="skills-grid">
           <div class="skill-subcategory">
-            <h3>Cloud Providers & Services</h3>
+            <h3 data-i18n="skill_sub_cloud">Cloud Providers & Services</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/aws.png" alt="AWS" class="skill-icon" />
@@ -215,7 +225,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Containerization & Servers</h3>
+            <h3 data-i18n="skill_sub_container">Containerization & Servers</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/docker.png" alt="Docker" class="skill-icon" />
@@ -241,7 +251,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>CI/CD & Version Control</h3>
+            <h3 data-i18n="skill_sub_cicd">CI/CD & Version Control</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/git.png" alt="Git" class="skill-icon" />
@@ -267,7 +277,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Security & DNS</h3>
+            <h3 data-i18n="skill_sub_security_dns">Security & DNS</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img
@@ -289,7 +299,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Operating Systems</h3>
+            <h3 data-i18n="skill_sub_os">Operating Systems</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/linux.png" alt="Linux" class="skill-icon" />
@@ -307,11 +317,11 @@
       <!-- Frontend Skills -->
       <section class="skill-category">
         <h2 class="category-toggle">
-          Frontend Skills <span class="toggle-icon">+</span>
+          <span data-i18n="skill_cat_frontend">Frontend Skills</span> <span class="toggle-icon">+</span>
         </h2>
         <div class="skills-grid">
           <div class="skill-subcategory">
-            <h3>Languages</h3>
+            <h3 data-i18n="skill_sub_fe_lang">Languages</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/JS.png" alt="JavaScript" class="skill-icon" />
@@ -329,7 +339,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>Frameworks & Libraries</h3>
+            <h3 data-i18n="skill_sub_fe_frameworks">Frameworks & Libraries</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img src="/img/React.png" alt="React" class="skill-icon" />
@@ -347,7 +357,7 @@
           </div>
 
           <div class="skill-subcategory">
-            <h3>CSS & UI Libraries</h3>
+            <h3 data-i18n="skill_sub_css_ui">CSS & UI Libraries</h3>
             <div class="skills-subgrid">
               <div class="skill-item">
                 <img
@@ -388,5 +398,6 @@
     </div>
 
     <script src="../js/skills.js"></script>
+    <script src="../js/i18n.js"></script>
   </body>
 </html>

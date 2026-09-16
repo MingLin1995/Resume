@@ -17,23 +17,29 @@
         <a href="/">
           <img
             src="../img/icon.png"
-            alt="首頁"
+            alt="Home"
             style="max-width: 30px; height: auto"
           />
         </a>
-        <div class="top-nav-links">
-          <a href="/projects">Projects</a>
-          <a href="/skills">Skills</a>
+        <div class="top-nav-actions">
+          <div class="top-nav-links">
+            <a href="/projects" data-i18n="nav_projects">Projects</a>
+            <a href="/skills" data-i18n="nav_skills">Skills</a>
+          </div>
+          <button id="lang-toggle-btn" class="lang-toggle-btn" aria-label="Toggle language">
+            <i class="fas fa-globe"></i>
+            <span class="lang-toggle-label">繁體中文</span>
+          </button>
         </div>
       </div>
       <div class="intro">
-        <h1>👋 Hi I'm Ming</h1>
-        <p>
+        <h1 data-i18n="intro_greeting">👋 Hi I'm Ming</h1>
+        <p data-i18n="intro_p1">
           I am a developer driven by curiosity, who started self-learning
           programming to meet investment needs, thus embarking on this path in
           tech.
         </p>
-        <p>
+        <p data-i18n="intro_p2">
           I am skilled at problem-solving with an interdisciplinary approach,
           leveraging the business logic cultivated through my accounting
           background and the communication and coordination skills developed in
@@ -44,7 +50,7 @@
           optimization, and I am able to collaborate closely with end-users to
           understand their needs.
         </p>
-        <p>
+        <p data-i18n="intro_p3">
           In recent years, I have also participated in multiple cross-industry
           projects through freelance work, where I was responsible for the
           entire process, from requirements gathering and system planning to
@@ -54,7 +60,7 @@
           feasibility and business requirements, ensuring projects move forward
           efficiently.
         </p>
-        <p>
+        <p data-i18n="intro_p4">
           I aspire to be an engineer who combines "technology × business ×
           communication," continuously deepening my technical expertise while
           expanding my influence in product thinking and team collaboration.
@@ -95,5 +101,6 @@
         >
       </div>
     </header>
+    <script src="/js/i18n.js"></script>
   </body>
 </html>

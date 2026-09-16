@@ -18,20 +18,79 @@
         <a href="/">
           <img
             src="../img/icon.png"
-            alt="首頁"
+            alt="Home"
             style="max-width: 30px; height: auto"
           />
         </a>
-        <div class="top-nav-links">
-          <a href="/projects">Projects</a>
-          <a href="/skills">Skills</a>
+        <div class="top-nav-actions">
+          <div class="top-nav-links">
+            <a href="/projects" data-i18n="nav_projects">Projects</a>
+            <a href="/skills" data-i18n="nav_skills">Skills</a>
+          </div>
+          <button id="lang-toggle-btn" class="lang-toggle-btn" aria-label="Toggle language">
+            <i class="fas fa-globe"></i>
+            <span class="lang-toggle-label">繁體中文</span>
+          </button>
         </div>
       </div>
     </div>
 
     <div class="projects-wrapper">
+      <!-- Open Source Section -->
+      <div class="projects-section oss-section">
+        <h2 class="section-title" data-i18n="section_oss">Open Source Contributions</h2>
+        <div class="oss-container">
+          <div class="oss-card">
+            <div class="oss-header">
+              <div class="oss-brand">
+                <img src="/img/nestjs.png" alt="NestJS Logo" class="oss-logo" />
+                <div class="oss-title-box">
+                  <div class="oss-title-row">
+                    <h3 class="oss-title" data-i18n="oss_nest_title">NestJS Core (@nestjs/common)</h3>
+                    <span class="badge badge-merged"><i class="fas fa-check-circle"></i> <span data-i18n="oss_nest_badge_merged">Merged</span></span>
+                  </div>
+                  <a href="https://github.com/nestjs/nest/pull/17668" target="_blank" class="oss-pr-link" data-i18n="oss_nest_pr_link_title">
+                    PR #17668: Support numeric string values in ParseEnumPipe
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="oss-body">
+              <ul class="oss-summary-list">
+                <li data-i18n-html="oss_nest_summary_1">
+                  <strong>Problem Discovery & Root Cause:</strong> Identified an unexpected validation failure when using <code>@Query()</code> with numeric enums, traced framework internals, and investigated community Issue #17638.
+                </li>
+                <li data-i18n-html="oss_nest_summary_2">
+                  <strong>Strict Architecture:</strong> Designed a type-safe coercion mechanism using exact string matching (<code>toEnumValue</code>), rejecting malformed edge cases (e.g. <code>'01'</code>, <code>'-0'</code>, <code>'1.0'</code>) to guarantee backward compatibility.
+                </li>
+                <li data-i18n-html="oss_nest_summary_3">
+                  <strong>Official Review & Merge:</strong> Authored comprehensive Jest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.
+                </li>
+              </ul>
+            </div>
+
+            <div class="oss-footer">
+              <div class="oss-links">
+                <a href="https://github.com/nestjs/nest/pull/17668" target="_blank" class="btn-oss-link" title="GitHub PR #17668">
+                  <i class="fab fa-github"></i> PR #17668
+                </a>
+                <a href="https://github.com/nestjs/nest/issues/17638" target="_blank" class="btn-oss-link" title="GitHub Issue #17638">
+                  <i class="fas fa-exclamation-circle"></i> Issue #17638
+                </a>
+              </div>
+              <button type="button" class="btn-deep-dive" id="open-deep-dive-btn">
+                <i class="fas fa-layer-group"></i>
+                <span data-i18n="btn_deep_dive">Deep Dive Architecture</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Section -->
       <div class="projects-section">
-        <h2 class="section-title">Project</h2>
+        <h2 class="section-title" data-i18n="section_project">Projects</h2>
         <div class="projects-container">
           <div class="project-item">
             <div class="thumbnail-wrapper">
@@ -41,7 +100,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>Crypto-Sniper V2</h3>
+            <h3 data-i18n="proj_crypto_v2_title">Crypto-Sniper V2</h3>
             <div class="project-links">
               <a href="https://crypto-sniper.minglin.net/" target="_blank"
                 ><img
@@ -58,7 +117,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_crypto_v2_desc">
               An upgraded automated crypto tracking dashboard. Features
               optimized live data fetching from Binance REST API, Redis caching,
               robust Docker containerization, NestJS backend, and multi-platform
@@ -73,7 +132,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>Crypto-Sniper (V1)</h3>
+            <h3 data-i18n="proj_crypto_v1_title">Crypto-Sniper</h3>
             <div class="project-links">
               <a
                 href="https://github.com/MingLin1995/CryptoSniper"
@@ -84,7 +143,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_crypto_v1_desc">
               Crypto Sniper is a tool designed to assist investors in
               identifying potential investment targets through moving average
               filters.
@@ -98,7 +157,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>Taipei-day-trip</h3>
+            <h3 data-i18n="proj_taipei_title">Taipei-day-trip</h3>
             <div class="project-links">
               <a
                 href="https://github.com/MingLin1995/taipei-day-trip"
@@ -109,7 +168,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_taipei_desc">
               Taipei Day Trip is an e-commerce website that allows users to
               search for attractions and book trips.
             </p>
@@ -117,8 +176,9 @@
         </div>
       </div>
 
+      <!-- Freelance Section -->
       <div class="projects-section">
-        <h2 class="section-title">Freelance</h2>
+        <h2 class="section-title" data-i18n="section_freelance">Freelance</h2>
         <div class="projects-container">
           <div class="project-item">
             <div class="thumbnail-wrapper">
@@ -128,7 +188,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>LINE Bot Appointment System</h3>
+            <h3 data-i18n="proj_linebot_title">LINE Bot Appointment System</h3>
             <div class="project-links">
               <a href="https://line.me/R/ti/p/@027xpzxy" target="_blank"
                 ><img
@@ -137,7 +197,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_linebot_desc">
               Built a LINE Bot–integrated appointment management system for a
               medical clinic, including appointment booking, staff scheduling,
               blacklist management, and daily automated notifications, with a
@@ -152,7 +212,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>Discussion Room Reservation System</h3>
+            <h3 data-i18n="proj_room_title">Discussion Room Reservation System</h3>
             <div class="project-links">
               <a href="https://room.iam.ntu.edu.tw/landing" target="_blank"
                 ><img
@@ -161,7 +221,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_room_desc">
               Designed and developed a discussion room reservation system
               supporting booking management, time-slot restrictions, admin
               dashboard, and automated email notifications.
@@ -175,7 +235,7 @@
                 class="project-thumbnail"
               />
             </div>
-            <h3>Interactive Game Campaign Page</h3>
+            <h3 data-i18n="proj_game_title">Interactive Game Campaign Page</h3>
             <div class="project-links">
               <a href="https://bowlcutlife2025.ttshow.tw/" target="_blank"
                 ><img
@@ -184,7 +244,7 @@
                   style="max-width: 30px; height: auto"
               /></a>
             </div>
-            <p>
+            <p data-i18n="proj_game_desc">
               Independently developed a decoupled front-end and back-end
               interactive game campaign page. Integrated dynamic front-end
               experiences with a robust backend architecture to deliver smooth
@@ -196,6 +256,106 @@
       </div>
     </div>
 
+    <!-- Deep Dive Modal -->
+    <div id="deep-dive-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-heading">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-badge-row">
+              <span class="badge badge-merged"><i class="fas fa-check-circle"></i> Merged</span>
+              <span class="badge badge-tag" data-i18n="modal_badge_pr">PR #17668</span>
+              <span class="badge badge-tag" data-i18n="modal_badge_issue">Issue #17638</span>
+              <span class="badge badge-author" data-i18n="modal_badge_merged">Merged by Kamil Mysliwiec</span>
+            </div>
+            <h2 id="modal-title-heading" class="modal-title" data-i18n="modal_title">NestJS Core Contribution: Architecture Deep Dive</h2>
+            <p class="modal-subtitle" data-i18n="modal_subtitle">Pull Request #17668 · Merged into nestjs/nest master</p>
+          </div>
+          <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Section 1 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-bug"></i> <span data-i18n="modal_sec1_title">1. Problem Discovery & Background</span>
+            </h3>
+            <p data-i18n-html="modal_sec1_p1">
+              Encountered an unexpected validation failure when using <code>@Query()</code> with TypeScript numeric enums. While an AI assistant initially suggested a manual workaround at the controller layer, I recognized that HTTP query parameters naturally arrive as strings and the underlying <code>ParseEnumPipe</code> should natively validate and coerce them rather than throwing a 400 error. Further investigation with AI assistance located existing community Issue #17638, leading to an upstream fix.
+            </p>
+            <p data-i18n-html="modal_sec1_p2">
+              The root cause: client requests send <code>?status=0</code>, which Express/Fastify parses as the string <code>'0'</code>. In previous versions, <code>ParseEnumPipe.isEnum()</code> strictly checked <code>[0, 1].includes('0')</code>, evaluating to <code>false</code> and unexpectedly throwing <code>400 Bad Request: "Validation failed (enum string is expected)"</code>.
+            </p>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-shield-alt"></i> <span data-i18n="modal_sec2_title">2. Community Issue & PR #17668</span>
+            </h3>
+            <p data-i18n-html="modal_sec2_p1">
+              Another PR (#17639) had initially been submitted by a community member. However, that contributor's environment was unfortunately compromised by an automated worm, force-pushing malicious payloads disguised in a <code>.woff2</code> font file and automation scripts.
+            </p>
+            <div class="modal-alert-box">
+              <p data-i18n-html="modal_sec2_p2">
+                NestJS maintainer <code>@micalevisk</code> promptly identified the security risk and closed the compromised PR, with the team subsequently introducing guardrails to protect against malicious PR payloads.
+              </p>
+            </div>
+            <p data-i18n-html="modal_sec2_p3">
+              Following the closure of #17639, my clean and independent implementation in <strong>PR #17668</strong> provided a secure and complete solution, allowing the maintainers to smoothly address the issue.
+            </p>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-code-branch"></i> <span data-i18n="modal_sec3_title">3. Technical Decisions & Type Safety</span>
+            </h3>
+            <p data-i18n-html="modal_sec3_p1">
+              <strong>Risks of Loose Coercion:</strong> A naive approach using <code>isNumeric</code> regex and <code>Number(value)</code> would inadvertently accept ambiguous inputs such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>.
+            </p>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_sec3_p2">
+                <strong>Design Requirement:</strong> Enum validation must maintain strict type boundaries, accepting only exact string representations of defined enum members (e.g., matching <code>'0'</code> to <code>0</code>, but rejecting <code>'00'</code> or <code>'1.0'</code>).
+              </p>
+            </div>
+            <p data-i18n-html="modal_sec3_p3">
+              <strong>Final Architecture:</strong> Implemented exact string matching via <code>toEnumValue</code> (<code>String(enumValue) === value</code>). This eliminated regex overhead and redundant passes in <code>transform()</code>, guaranteeing strict enum type safety.
+            </p>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-vial"></i> <span data-i18n="modal_sec4_title">4. Edge Cases & Jest Testing</span>
+            </h3>
+            <p data-i18n="modal_sec4_p1">Authored comprehensive Jest unit tests covering:</p>
+            <ul class="modal-list">
+              <li data-i18n-html="modal_sec4_li1">Edge case rejections: Explicitly asserted that ambiguous inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.</li>
+              <li data-i18n-html="modal_sec4_li2">Enum variants: Validated compatibility across string enums, numeric enums, mixed enums, and float-valued enums.</li>
+              <li data-i18n-html="modal_sec4_li3">Extensibility: Streamlined protected methods and properly typed <code>getEnumValues(): (string | number)[]</code>.</li>
+            </ul>
+          </div>
+
+          <!-- Section 5 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-rocket"></i> <span data-i18n="modal_sec5_title">5. Optimization & Official Merge</span>
+            </h3>
+            <p data-i18n-html="modal_sec5_p1">
+              NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the implementation, added a follow-up optimization commit (<code>perf(common): memoize enum values lookup</code>) to cache enum values across requests, and officially merged PR #17668 into the master branch.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="modal-btn modal-btn-secondary" id="modal-footer-close-btn" data-i18n="modal_btn_close">Close</button>
+          <a href="https://github.com/nestjs/nest/pull/17668" target="_blank" class="modal-btn modal-btn-primary">
+            <i class="fab fa-github"></i> <span data-i18n="modal_btn_view_pr">View on GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- Image Lightbox Modal -->
     <div id="image-lightbox" class="lightbox">
       <span class="lightbox-close">&times;</span>
@@ -203,5 +363,6 @@
     </div>
 
     <script src="../js/projects.js"></script>
+    <script src="../js/i18n.js"></script>
   </body>
 </html>

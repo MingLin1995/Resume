@@ -28,12 +28,54 @@ body {
 .top-nav a {
   text-decoration: none;
   color: black;
-  margin: 0 20px;
+  margin: 0 15px;
   font-weight: bold;
+  transition: color 0.2s ease;
+}
+
+.top-nav a:hover {
+  color: #0066cc;
 }
 
 .top-nav-links {
   display: flex;
+  align-items: center;
+}
+
+.top-nav-actions {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.lang-toggle-btn {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  outline: none;
+  user-select: none;
+}
+
+.lang-toggle-btn:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.lang-toggle-btn i {
+  font-size: 1em;
+  color: #4b5563;
 }
 
 .intro {
