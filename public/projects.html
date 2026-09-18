@@ -60,13 +60,13 @@
             <div class="oss-body">
               <ul class="oss-summary-list">
                 <li data-i18n-html="oss_nest_microservices_summary_1">
-                  <strong>Event Pipeline Lifecycle (PR #17781):</strong> Identified that unhandled rejections bypassed <code>onProcessingEndHook</code>, leaving OpenTelemetry/APM spans unclosed; designed <code>createProcessingEndHookRunner</code> on base <code>Server</code> to guarantee idempotent teardown across asynchronous execution paths.
+                  <strong>Failures produced no telemetry (PR #17781):</strong> When a message handler threw, NestJS skipped the hook that closes the tracing span &mdash; so the failures engineers most need to see left no trace at all, and each one stayed in memory for good. Fixed on the base <code>Server</code> class with a guard that closes the span exactly once, whichever path settles first.
                 </li>
                 <li data-i18n-html="oss_nest_microservices_summary_2">
-                  <strong>Framework-Wide Adoption:</strong> The idempotent runner pattern was officially adopted across NestJS transport layers (MQTT, NATS, Redis, TCP, RMQ), standardizing end-hook execution during failure handling.
+                  <strong>Adopted as the framework standard:</strong> NestJS's author reused that guard in the follow-up PR #17794 across five transports (MQTT, NATS, Redis, TCP, RMQ), citing #17781 as the precedent. It is today the only place in <code>@nestjs/microservices</code> where the end hook is called.
                 </li>
                 <li data-i18n-html="oss_nest_microservices_summary_3">
-                  <strong>Kafka Retries & Streams (PR #17797):</strong> Resolved complex edge cases in <code>ServerKafka</code>: prevented duplicate span closures across multi-value streams and eliminated compounding span leaks during <code>KafkaRetriableException</code> retry cycles.
+                  <strong>Kafka: leaks that grew under load (PR #17797):</strong> Three defects on Kafka's request-response path &mdash; the worst leaked one span per retry, so the longer a downstream service stayed down, the faster memory grew. Three of the six tests added fail against the pre-fix code.
                 </li>
               </ul>
             </div>
@@ -82,7 +82,7 @@
               </div>
               <button type="button" class="btn-deep-dive" data-modal-target="#deep-dive-modal-microservices">
                 <i class="fas fa-layer-group"></i>
-                <span data-i18n="btn_deep_dive_microservices">Deep Dive: Architectural Details</span>
+                <span data-i18n="btn_deep_dive_microservices">How I found it and what I changed</span>
               </button>
             </div>
           </div>
@@ -107,10 +107,10 @@
             <div class="oss-body">
               <ul class="oss-summary-list">
                 <li data-i18n-html="oss_nest_summary_1">
-                  <strong>Problem Discovery & Root Cause:</strong> Identified an unexpected validation failure when using <code>@Query()</code> with numeric enums, traced framework internals, and investigated community Issue #17638.
+                  <strong>A pipe that rejected every valid value:</strong> <code>ParseEnumPipe</code> returned <code>400</code> for every member of a numeric enum: HTTP params arrive as strings, so the check compared <code>'0'</code> against <code>0</code> and never matched. Traced through the framework internals to community Issue #17638.
                 </li>
                 <li data-i18n-html="oss_nest_summary_2">
-                  <strong>Strict Architecture:</strong> Designed a type-safe coercion mechanism using exact string matching (<code>toEnumValue</code>), rejecting malformed edge cases (e.g. <code>'01'</code>, <code>'-0'</code>, <code>'1.0'</code>) to guarantee backward compatibility.
+                  <strong>Fixed strictly, on purpose:</strong> The obvious fix &mdash; <code>Number(value)</code> &mdash; would also have accepted <code>''</code>, <code>'01'</code> and <code>'1.0'</code>; an empty query string would have silently become a valid enum member. Matching on the exact value instead accepts only <code>'0'</code> for <code>0</code>. The pipe now also returns the enum member itself, not the original string.
                 </li>
                 <li data-i18n-html="oss_nest_summary_3">
                   <strong>Official Review & Merge:</strong> Authored comprehensive Vitest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.
@@ -129,7 +129,7 @@
               </div>
               <button type="button" class="btn-deep-dive" data-modal-target="#deep-dive-modal-17668">
                 <i class="fas fa-layer-group"></i>
-                <span data-i18n="btn_deep_dive">Deep Dive: Architectural Details</span>
+                <span data-i18n="btn_deep_dive">How I found it and what I changed</span>
               </button>
             </div>
           </div>
@@ -497,6 +497,9 @@
         String(enumValue) === value),
   );
 }</code></pre>
+            <p data-i18n-html="modal_sec2_p4">
+              Validation was only half of the defect. <code>transform</code> still returned the raw input, so a parameter annotated <code>Status</code> would hold the string <code>'0'</code> at runtime and <code>switch (status) { case Status.Active: }</code> would silently never match &mdash; a failure with no error to trace. It now returns the matched enum member, keeping the runtime value aligned with the declared type, while string enums such as <code>Digit.Zero = '0'</code> keep their string values through the identity branch.
+            </p>
             <div class="modal-highlight-box">
               <p data-i18n-html="modal_sec2_p3">
                 This guaranteed zero regular expression overhead and rejected malformed inputs upfront, preserving strict enum typing while cleanly coercing valid numeric string representations into their canonical enum values.
@@ -517,10 +520,10 @@
                 <strong>Strict edge case rejections:</strong> Explicitly asserted that ambiguous numeric inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.
               </li>
               <li data-i18n-html="modal_sec3_li2">
-                <strong>Comprehensive enum coverage:</strong> Validated seamless compatibility across string enums, numeric enums, mixed enums, and float-valued enums.
+                <strong>Comprehensive enum coverage:</strong> Validated string enums, numeric enums, mixed enums, negative values, and float-valued enums.
               </li>
               <li data-i18n-html="modal_sec3_li3">
-                <strong>Extensibility:</strong> Cleanly structured protected methods with accurate <code>getEnumValues(): (string | number)[]</code> typing.
+                <strong>Type preservation:</strong> Asserted that a string enum whose values are digit characters (<code>Digit.Zero = '0'</code>) keeps its string type and is never coerced to a number.
               </li>
             </ul>
             <div class="modal-highlight-box">

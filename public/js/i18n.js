@@ -22,10 +22,10 @@ const translations = {
     oss_nest_microservices_title: "NestJS Core (@nestjs/microservices)",
     oss_nest_microservices_badge_merged: "Merged",
     oss_nest_microservices_pr_link_title: "PR #17781 & #17797: Resolving Observability Span Leaks in Microservices",
-    oss_nest_microservices_summary_1: "<strong>Event Pipeline Lifecycle (PR #17781):</strong> Identified that unhandled rejections bypassed <code>onProcessingEndHook</code>, leaving OpenTelemetry/APM spans unclosed; designed <code>createProcessingEndHookRunner</code> on base <code>Server</code> to guarantee idempotent teardown across asynchronous execution paths.",
-    oss_nest_microservices_summary_2: "<strong>Framework-Wide Adoption:</strong> The idempotent runner pattern was officially adopted across NestJS transport layers (MQTT, NATS, Redis, TCP, RMQ), standardizing end-hook execution during failure handling.",
-    oss_nest_microservices_summary_3: "<strong>Kafka Retries & Streams (PR #17797):</strong> Resolved complex edge cases in <code>ServerKafka</code>: prevented duplicate span closures across multi-value streams and eliminated compounding span leaks during <code>KafkaRetriableException</code> retry cycles.",
-    btn_deep_dive_microservices: "Deep Dive: Architectural Details",
+    oss_nest_microservices_summary_1: "<strong>Failures produced no telemetry (PR #17781):</strong> When a message handler threw, NestJS skipped the hook that closes the tracing span &mdash; so the failures engineers most need to see left no trace at all, and each one stayed in memory for good. Fixed on the base <code>Server</code> class with a guard that closes the span exactly once, whichever path settles first.",
+    oss_nest_microservices_summary_2: "<strong>Adopted as the framework standard:</strong> NestJS's author reused that guard in the follow-up PR #17794 across five transports (MQTT, NATS, Redis, TCP, RMQ), citing #17781 as the precedent. It is today the only place in <code>@nestjs/microservices</code> where the end hook is called.",
+    oss_nest_microservices_summary_3: "<strong>Kafka: leaks that grew under load (PR #17797):</strong> Three defects on Kafka's request-response path &mdash; the worst leaked one span per retry, so the longer a downstream service stayed down, the faster memory grew. Three of the six tests added fail against the pre-fix code.",
+    btn_deep_dive_microservices: "How I found it and what I changed",
 
     // Deep Dive Modal - Unified Microservices Series
     modal_microservices_title: "Observability Lifecycle in NestJS Microservices",
@@ -65,10 +65,10 @@ const translations = {
     oss_nest_title: "NestJS Core (@nestjs/common)",
     oss_nest_badge_merged: "Merged",
     oss_nest_pr_link_title: "PR #17668: Support numeric string values in ParseEnumPipe",
-    oss_nest_summary_1: "<strong>Problem Discovery & Root Cause:</strong> Identified an unexpected validation failure when using <code>@Query()</code> with numeric enums, traced framework internals, and investigated community Issue #17638.",
-    oss_nest_summary_2: "<strong>Strict Architecture:</strong> Designed a type-safe coercion mechanism using exact string matching (<code>toEnumValue</code>), rejecting malformed edge cases (e.g. <code>'01'</code>, <code>'-0'</code>, <code>'1.0'</code>) to guarantee backward compatibility.",
+    oss_nest_summary_1: "<strong>A pipe that rejected every valid value:</strong> <code>ParseEnumPipe</code> returned <code>400</code> for every member of a numeric enum: HTTP params arrive as strings, so the check compared <code>'0'</code> against <code>0</code> and never matched. Traced through the framework internals to community Issue #17638.",
+    oss_nest_summary_2: "<strong>Fixed strictly, on purpose:</strong> The obvious fix &mdash; <code>Number(value)</code> &mdash; would also have accepted <code>''</code>, <code>'01'</code> and <code>'1.0'</code>; an empty query string would have silently become a valid enum member. Matching on the exact value instead accepts only <code>'0'</code> for <code>0</code>. The pipe now also returns the enum member itself, not the original string.",
     oss_nest_summary_3: "<strong>Official Review & Merge:</strong> Authored comprehensive Vitest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.",
-    btn_deep_dive: "Deep Dive: Architectural Details",
+    btn_deep_dive: "How I found it and what I changed",
 
     // Deep Dive Modal - PR #17668
     modal_title: "Numeric String Coercion in ParseEnumPipe",
@@ -86,12 +86,13 @@ const translations = {
     modal_sec2_p1: "The design required careful consideration: a loose approach using regular expressions combined with <code>Number(value)</code> would unintentionally coerce ambiguous inputs—such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>—violating strict TypeScript enum semantics.",
     modal_sec2_p2: "To ensure rigorous type safety and backward compatibility, <code>toEnumValue</code> evaluates two distinct conditions: preserving strict identity comparison for standard inputs, and enabling string literal matching exclusively when an enum member is a number and input is a string:",
     modal_sec2_p3: "This guaranteed zero regular expression overhead and rejected malformed inputs upfront, preserving strict enum typing while cleanly coercing valid numeric string representations into their canonical enum values.",
+    modal_sec2_p4: "Validation was only half of the defect. <code>transform</code> still returned the raw input, so a parameter annotated <code>Status</code> would hold the string <code>'0'</code> at runtime and <code>switch (status) { case Status.Active: }</code> would silently never match &mdash; a failure with no error to trace. It now returns the matched enum member, keeping the runtime value aligned with the declared type, while string enums such as <code>Digit.Zero = '0'</code> keep their string values through the identity branch.",
 
     modal_sec3_title: "3. Testing Matrix & Official Memoization",
     modal_sec3_p1: "A comprehensive Vitest test suite was authored to validate the implementation across enum variations and edge cases:",
     modal_sec3_li1: "<strong>Strict edge case rejections:</strong> Explicitly asserted that ambiguous numeric inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.",
-    modal_sec3_li2: "<strong>Comprehensive enum coverage:</strong> Validated seamless compatibility across string enums, numeric enums, mixed enums, and float-valued enums.",
-    modal_sec3_li3: "<strong>Extensibility:</strong> Cleanly structured protected methods with accurate <code>getEnumValues(): (string | number)[]</code> typing.",
+    modal_sec3_li2: "<strong>Comprehensive enum coverage:</strong> Validated string enums, numeric enums, mixed enums, negative values, and float-valued enums.",
+    modal_sec3_li3: "<strong>Type preservation:</strong> Asserted that a string enum whose values are digit characters (<code>Digit.Zero = '0'</code>) keeps its string type and is never coerced to a number.",
     modal_sec3_p2: "NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the PR and contributed a follow-up commit (<code>perf(common): memoize enum values lookup</code>) to cache enum lookups across HTTP requests, subsequently merging PR #17668 into the master branch.",
 
     modal_btn_close: "Close",
@@ -152,10 +153,10 @@ const translations = {
     oss_nest_microservices_title: "NestJS 官方核心庫 (@nestjs/microservices)",
     oss_nest_microservices_badge_merged: "已合併 (Merged)",
     oss_nest_microservices_pr_link_title: "PR #17781 & #17797: 修復微服務事件管線與 Kafka 中的 Span 洩漏問題",
-    oss_nest_microservices_summary_1: "<strong>事件管線生命週期治理（PR #17781）：</strong> 分析事件處理器 reject 拋錯時會跳過 <code>onProcessingEndHook</code>，導致 OpenTelemetry / APM 追蹤 Span 未能閉合；於基底 <code>Server</code> 引入具冪等特性的 <code>createProcessingEndHookRunner</code>，防範非同步執行時的重複 teardown。",
-    oss_nest_microservices_summary_2: "<strong>官方跨傳輸層採納：</strong> 冪等防護機制獲官方套用於 MQTT、NATS、Redis、TCP 與 RMQ 等多種傳輸層，統一了微服務在異常路徑上的 Hook 執行標準。",
-    oss_nest_microservices_summary_3: "<strong>Kafka 重試邊界與串流收斂（PR #17797）：</strong> 深入梳理 <code>ServerKafka</code> 請求回應管線：修正多值串流重複關閉 Span 的問題，並修復 <code>KafkaRetriableException</code> 在自動重試過程中持續累積未閉合 Span 的隱患。",
-    btn_deep_dive_microservices: "詳細架構解析 (Deep Dive)",
+    oss_nest_microservices_summary_1: "<strong>失敗的請求留不下任何追蹤紀錄（PR #17781）：</strong> 事件處理器拋出例外時，NestJS 會跳過關閉追蹤 Span 的 hook——工程師最需要觀察的失敗案例反而完全沒有追蹤資料，而且每一筆都永久滯留在記憶體中。於基底 <code>Server</code> 類別加入防護，確保 Span 只會被關閉一次，無論哪條非同步路徑先結束。",
+    oss_nest_microservices_summary_2: "<strong>獲官方採納為框架標準：</strong> NestJS 作者於後續 PR #17794 沿用此防護機制，套用至 MQTT、NATS、Redis、TCP、RMQ 五種傳輸層，並以 #17781 為實作先例。現今整個 <code>@nestjs/microservices</code> 套件中，end hook 僅存此一處呼叫點。",
+    oss_nest_microservices_summary_3: "<strong>Kafka：越出事漏得越快（PR #17797）：</strong> 修復 Kafka 請求回應路徑上的三項缺陷，其中最嚴重的一項會在每次重試時多漏一個 Span——下游服務掛得越久，記憶體成長得越快。新增的六項測試中，有三項在修復前的程式碼上為失敗狀態。",
+    btn_deep_dive_microservices: "如何發現，以及我改了什麼",
 
     // Deep Dive Modal - Unified Microservices Series
     modal_microservices_title: "NestJS 微服務 Observability 生命週期治理",
@@ -195,10 +196,10 @@ const translations = {
     oss_nest_title: "NestJS 官方核心庫 (@nestjs/common)",
     oss_nest_badge_merged: "已合併 (Merged)",
     oss_nest_pr_link_title: "PR #17668: 支援 ParseEnumPipe 數值字串型態轉換",
-    oss_nest_summary_1: "<strong>實戰發現與定位 Issue #17638：</strong> 於專案實作 <code>@Query()</code> 搭配數值列舉時發現驗證異常，主動探究框架底層機制，並追蹤定位至官方 Issue #17638 提出修復。",
-    oss_nest_summary_2: "<strong>嚴謹架構設計：</strong> 設計型別安全的轉型機制（<code>toEnumValue</code>），採用精確字串比對，嚴格拒絕模糊的邊界案例（如 <code>'01'</code>、<code>'-0'</code>、<code>'1.0'</code>），確保向下相容與型別嚴謹。",
+    oss_nest_summary_1: "<strong>一個把所有合法值都擋掉的 Pipe：</strong> <code>ParseEnumPipe</code> 會對數值列舉的每一個成員回傳 <code>400</code>：HTTP 參數抵達時皆為字串，因此比對的是 <code>'0'</code> 與 <code>0</code>，永遠不會相等。追溯框架底層機制後定位至官方 Issue #17638。",
+    oss_nest_summary_2: "<strong>刻意選擇嚴格的修法：</strong> 最直覺的修法 <code>Number(value)</code> 會連 <code>''</code>、<code>'01'</code>、<code>'1.0'</code> 一併放行——空白的查詢參數會悄悄變成一個合法的列舉值。改以精確值比對，<code>0</code> 就只接受 <code>'0'</code>。同時讓 Pipe 回傳列舉成員本身，而非原始字串。",
     oss_nest_summary_3: "<strong>官方 Review 與合併：</strong> 完整補齊 Vitest 單元測試與型別邊界防禦，由 NestJS 創始人 Kamil Mysliwiec 親自 Review、追加記憶化優化並順利合併進 master 分支。",
-    btn_deep_dive: "詳細架構解析 (Deep Dive)",
+    btn_deep_dive: "如何發現，以及我改了什麼",
 
     // Deep Dive Modal - PR #17668
     modal_title: "ParseEnumPipe 數值字串型態轉換機制",
@@ -216,12 +217,13 @@ const translations = {
     modal_sec2_p1: "這項修正的架構關鍵在於型別嚴謹度：若採用寬鬆的正則表達式搭配 <code>Number(value)</code> 轉型，會導致 <code>'00'</code>、<code>'01'</code>、<code>'1.0'</code> 或 <code>'-0'</code> 等模糊字串被錯誤視為合法成員，破壞 TypeScript 列舉的精確語意。",
     modal_sec2_p2: "為了確保型別邊界與向下相容性，於 <code>toEnumValue</code> 設計兩層比對：保留原有的嚴格恆等比對，僅在「列舉值為 number 且輸入為 string」時啟用字面值轉型：",
     modal_sec2_p3: "這種設計既避免了正則比對的額外開銷，又能嚴格拒絕不合規的邊界值，在確保零副作用的前提下，將合法的數值字串無縫轉型為對應的列舉型別。",
+    modal_sec2_p4: "驗證僅是缺陷的一半。<code>transform</code> 當時仍原樣回傳輸入值，因此標註為 <code>Status</code> 的參數在執行期實際持有的是字串 <code>'0'</code>，<code>switch (status) { case Status.Active: }</code> 會靜默地永不成立——一種沒有任何錯誤訊息可追的失效。修正後改為回傳比對到的列舉成員，使執行期值與宣告型別一致；而 <code>Digit.Zero = '0'</code> 這類字串列舉則透過恆等比對分支保留其字串型別。",
 
     modal_sec3_title: "3. 邊界測試矩陣與官方快取最佳化",
     modal_sec3_p1: "實作附帶了完整的 Vitest 單元測試矩陣，全面覆蓋各類列舉場景與防禦邊界：",
     modal_sec3_li1: "<strong>邊界防禦斷言：</strong> 嚴格斷言 <code>'01'</code>、<code>'1.0'</code> 與 <code>'-0'</code> 等模糊輸入均正確被拒絕並拋出 <code>BadRequestException</code>。",
-    modal_sec3_li2: "<strong>完整列舉類型覆蓋：</strong> 確保數值列舉、字串列舉、混合型列舉與包含浮點數的列舉皆能正確解析。",
-    modal_sec3_li3: "<strong>架構擴充性：</strong> 梳理 protected 方法層級，為 <code>getEnumValues()</code> 補齊精確的 <code>(string | number)[]</code> 型別宣告。",
+    modal_sec3_li2: "<strong>完整列舉類型覆蓋：</strong> 涵蓋數值列舉、字串列舉、混合型列舉、負數值與包含浮點數的列舉。",
+    modal_sec3_li3: "<strong>型別保全：</strong> 斷言值為數字字元的字串列舉（<code>Digit.Zero = '0'</code>）維持字串型別，不會被轉型為數值。",
     modal_sec3_p2: "PR 提交後，NestJS 創辦人 <strong>Kamil Mysliwiec</strong> 親自審查程式碼，追加了記憶化快取最佳化（<code>perf(common): memoize enum values lookup</code>）以避免每次請求重複計算列舉值，隨後順利將 PR #17668 合併至 master 分支。",
 
     modal_btn_close: "關閉",
