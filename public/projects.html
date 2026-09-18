@@ -40,6 +40,54 @@
       <div class="projects-section oss-section">
         <h2 class="section-title" data-i18n="section_oss">Open Source Contributions</h2>
         <div class="oss-container">
+          <!-- Card 1: Microservices Observability Series (PR #17781 & #17797 - Featured) -->
+          <div class="oss-card oss-card-featured">
+            <div class="oss-header">
+              <div class="oss-brand">
+                <img src="/img/nestjs.png" alt="NestJS Logo" class="oss-logo" />
+                <div class="oss-title-box">
+                  <div class="oss-title-row">
+                    <h3 class="oss-title" data-i18n="oss_nest_microservices_title">NestJS Core (@nestjs/microservices)</h3>
+                    <span class="badge badge-merged"><i class="fas fa-check-circle"></i> <span data-i18n="oss_nest_microservices_badge_merged">Merged</span></span>
+                  </div>
+                  <a href="https://github.com/nestjs/nest/pull/17781" target="_blank" class="oss-pr-link" data-i18n="oss_nest_microservices_pr_link_title">
+                    PR #17781 & #17797: Resolving Observability Span Leaks in Microservices
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="oss-body">
+              <ul class="oss-summary-list">
+                <li data-i18n-html="oss_nest_microservices_summary_1">
+                  <strong>Event Pipeline Lifecycle (PR #17781):</strong> Identified that unhandled rejections bypassed <code>onProcessingEndHook</code>, leaving OpenTelemetry/APM spans unclosed; designed <code>createProcessingEndHookRunner</code> on base <code>Server</code> to guarantee idempotent teardown across asynchronous execution paths.
+                </li>
+                <li data-i18n-html="oss_nest_microservices_summary_2">
+                  <strong>Framework-Wide Adoption:</strong> The idempotent runner pattern was officially adopted across NestJS transport layers (MQTT, NATS, Redis, TCP, RMQ), standardizing end-hook execution during failure handling.
+                </li>
+                <li data-i18n-html="oss_nest_microservices_summary_3">
+                  <strong>Kafka Retries & Streams (PR #17797):</strong> Resolved complex edge cases in <code>ServerKafka</code>: prevented duplicate span closures across multi-value streams and eliminated compounding span leaks during <code>KafkaRetriableException</code> retry cycles.
+                </li>
+              </ul>
+            </div>
+
+            <div class="oss-footer">
+              <div class="oss-links">
+                <a href="https://github.com/nestjs/nest/pull/17781" target="_blank" class="btn-oss-link" title="GitHub PR #17781 (Event Pipeline)">
+                  <i class="fab fa-github"></i> PR #17781
+                </a>
+                <a href="https://github.com/nestjs/nest/pull/17797" target="_blank" class="btn-oss-link" title="GitHub PR #17797 (Kafka Request-Response)">
+                  <i class="fab fa-github"></i> PR #17797
+                </a>
+              </div>
+              <button type="button" class="btn-deep-dive" data-modal-target="#deep-dive-modal-microservices">
+                <i class="fas fa-layer-group"></i>
+                <span data-i18n="btn_deep_dive_microservices">Deep Dive: Architectural Details</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: PR #17668 (Validation & Type Coercion) -->
           <div class="oss-card">
             <div class="oss-header">
               <div class="oss-brand">
@@ -65,7 +113,7 @@
                   <strong>Strict Architecture:</strong> Designed a type-safe coercion mechanism using exact string matching (<code>toEnumValue</code>), rejecting malformed edge cases (e.g. <code>'01'</code>, <code>'-0'</code>, <code>'1.0'</code>) to guarantee backward compatibility.
                 </li>
                 <li data-i18n-html="oss_nest_summary_3">
-                  <strong>Official Review & Merge:</strong> Authored comprehensive Jest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.
+                  <strong>Official Review & Merge:</strong> Authored comprehensive Vitest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.
                 </li>
               </ul>
             </div>
@@ -79,9 +127,9 @@
                   <i class="fas fa-exclamation-circle"></i> Issue #17638
                 </a>
               </div>
-              <button type="button" class="btn-deep-dive" id="open-deep-dive-btn">
+              <button type="button" class="btn-deep-dive" data-modal-target="#deep-dive-modal-17668">
                 <i class="fas fa-layer-group"></i>
-                <span data-i18n="btn_deep_dive">Deep Dive Architecture</span>
+                <span data-i18n="btn_deep_dive">Deep Dive: Architectural Details</span>
               </button>
             </div>
           </div>
@@ -256,8 +304,145 @@
       </div>
     </div>
 
-    <!-- Deep Dive Modal -->
-    <div id="deep-dive-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-heading">
+    <!-- Deep Dive Modal - Unified Microservices Series (PR #17781 & #17797) -->
+    <div id="deep-dive-modal-microservices" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-microservices-title-heading">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-badge-row">
+              <span class="badge badge-merged"><i class="fas fa-check-circle"></i> Merged</span>
+              <span class="badge badge-tag" data-i18n="modal_microservices_badge_pr1">PR #17781</span>
+              <span class="badge badge-tag" data-i18n="modal_microservices_badge_pr2">PR #17797</span>
+              <span class="badge badge-author" data-i18n="modal_microservices_badge_merged">Merged by Kamil Mysliwiec</span>
+            </div>
+            <h2 id="modal-microservices-title-heading" class="modal-title" data-i18n="modal_microservices_title">Observability Lifecycle in NestJS Microservices</h2>
+            <p class="modal-subtitle" data-i18n="modal_microservices_subtitle">Resolving Telemetry Span Leaks in Failure Paths & Distributed Retries (PR #17781 & #17797)</p>
+            <div class="modal-fact-banner">
+              <i class="fas fa-layer-group"></i> <span data-i18n="modal_microservices_fact">2 merged PRs · #17781, #17797 · nestjs/nest · September 2026 · Part of a 6-PR remediation chain</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Section 1 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-search"></i> <span data-i18n="modal_microservices_sec1_title">1. A Defect That Would Never Be Reported</span>
+            </h3>
+            <p data-i18n-html="modal_microservices_sec1_p1">
+              <code>setOnProcessingStartHook</code> and <code>setOnProcessingEndHook</code> are extension points exposed by NestJS for observability integrations, with zero consumers inside the repository or its dependencies—standard NestJS applications never invoke them. There are no stack traces, no failing requests, and no users opening issues.
+            </p>
+            <p data-i18n-html="modal_microservices_sec1_p2">
+              Defects of this kind can only be uncovered proactively. The catalyst was PR #17766: <code>ServerKafka#handleEvent</code> only closed its span upon successful completion, and that fix introduced RxJS <code>finalize()</code> to encompass both complete and error terminations. The fix was correct on its own terms, but prompted a crucial question: did the same class of defect still exist in the base class from which Kafka inherits?
+            </p>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-exclamation-triangle"></i> <span data-i18n="modal_microservices_sec2_title">2. Observability Blind Spots on Failing Paths</span>
+            </h3>
+            <p data-i18n-html="modal_microservices_sec2_p1">
+              In distributed microservice architectures, observability tools (such as OpenTelemetry, Datadog, and Sentry) rely on spans to profile latency and capture error diagnostics. The start hook establishes the async trace context so every log line and query inside the handler attributes to one span; the end hook closes and exports it upon completion.
+            </p>
+            <p data-i18n-html="modal_microservices_sec2_p2">
+              In the base <code>Server#handleEvent</code> pipeline, execution awaited the handler before evaluating completion branches (RxJS Observables vs. plain values). Both branches were implemented correctly, but when a handler rejected, the <code>await</code> expression threw immediately before either branch was evaluated. Teardown logic was bypassed entirely, leaving <code>onProcessingEndHook</code> uncalled.
+            </p>
+            <div class="modal-alert-box">
+              <p data-i18n-html="modal_microservices_sec2_p3">
+                The consequence: during system outages—the exact moments engineers rely on traces most—failing events failed to produce telemetry. In high-throughput services processing malformed payloads, unclosed spans persisted in memory indefinitely, creating memory bloat while leaving monitoring systems blind to failures.
+              </p>
+            </div>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-shield-alt"></i> <span data-i18n="modal_microservices_sec3_title">3. Idempotent Teardown Architecture on the Base Class</span>
+            </h3>
+            <p data-i18n-html="modal_microservices_sec3_p1">
+              A naive fix might wrap the handler invocation in <code>try/catch</code>, execute the end hook upon catching the error, and rethrow. However, in transports that await stream resolution to acknowledge message settlement (such as Kafka offset commits), an erroring stream triggers both RxJS <code>finalize</code> and the outer catch block. Without protection, a single event triggers the end hook twice, corrupting trace state.
+            </p>
+            <p data-i18n-html="modal_microservices_sec3_p2">
+              To fundamentally resolve this across transports, the solution was elevated to the base class as <code>Server#createProcessingEndHookRunner</code>, encapsulating both idempotency protection and the event's context in a closure:
+            </p>
+            <pre class="modal-code-block"><code>protected createProcessingEndHookRunner(context: BaseRpcContext): () => void {
+  let isEndHookCalled = false;
+  return () => {
+    if (isEndHookCalled) {
+      return;
+    }
+    isEndHookCalled = true;
+    this.onProcessingEndHook?.(this.transportId!, context);
+  };
+}</code></pre>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_microservices_sec3_p3">
+                This established a strict invariant: <em>"the span closes safely exactly once, via whichever asynchronous path settles first"</em>. Following PR #17781, NestJS creator Kamil Mysliwiec adopted this exact pattern in #17794 across MQTT, NATS, Redis, TCP, and RMQ, establishing a unified teardown standard across transports.
+              </p>
+            </div>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-layer-group"></i> <span data-i18n="modal_microservices_sec4_title">4. Kafka Retry Boundaries & Stream Convergence</span>
+            </h3>
+            <p data-i18n-html="modal_microservices_sec4_p1">
+              The generalization covered five transports but left Kafka untouched. Reading the implementation with the same critical eye revealed three remaining unhandled edge cases:
+            </p>
+            <ul class="modal-list">
+              <li data-i18n-html="modal_microservices_sec4_li1">
+                <strong>Multi-value stream emissions:</strong> <code>onProcessingEndHook</code> originally lived inside <code>sendMessage</code>, executing per emitted packet; when a stream emitted multiple replies, the same span was closed multiple times.
+              </li>
+              <li data-i18n-html="modal_microservices_sec4_li2">
+                <strong>Compounding leaks from retriable errors:</strong> When a handler threw <code>KafkaRetriableException</code>, <code>combineStreamsAndThrowIfRetriable</code> rejected, halting execution before message dispatch and leaving the span unsettled. Because <code>kafkajs</code> automatically redelivers retriable messages, every retry leaked another unsettled span, creating compounding memory bloat in production.
+              </li>
+              <li data-i18n-html="modal_microservices_sec4_li3">
+                <strong>Unpaired calls on unhandled paths:</strong> The <code>NO_MESSAGE_HANDLER</code> path published a response without ever invoking a start hook, causing an unpaired end hook execution (the same unpaired invocation #17794 removed from MQTT, NATS, and Redis).
+              </li>
+            </ul>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_microservices_sec4_p2">
+                In <strong>PR #17797</strong>, the hook was decoupled into the response stream's <code>finalize</code> operator, governed by the idempotent runner, while an outer <code>try/catch</code> settled the span before rethrowing <code>KafkaRetriableException</code>. This preserved Kafka's native retry behavior while guaranteeing that spans close <strong>Exactly-Once</strong>. During code review, maintainers contributed an adjacent edge case: observables completing without emitting values failed to resolve internal promises, similarly causing unsettled trace states.
+              </p>
+            </div>
+          </div>
+
+          <!-- Section 5 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-bullseye"></i> <span data-i18n="modal_microservices_sec5_title">5. The Single Call Site</span>
+            </h3>
+            <p data-i18n-html="modal_microservices_sec5_p1">
+              Within hours, this line of remediation advanced two further PRs. #17779 tackled the gRPC request-stream path, discovering along the way that <code>grpc-js</code> never actually emits an <code>error</code> event—cancellations are signaled via <code>cancelled</code> and <code>close</code>, meaning existing cancellation teardown had never executed in production. #17799 then consolidated the ad-hoc exception scaffolding across all transports into <code>Server#runWithProcessingHooks</code>, routing every transport through it uniformly.
+            </p>
+            <p data-i18n-html="modal_microservices_sec5_p2">
+              Following that refactor, throughout the entire <code>@nestjs/microservices</code> package, <code>onProcessingEndHook</code> retained only a single call site—housed directly inside the idempotent guard introduced in #17781. The surrounding code was completely rewritten; the guard remained.
+            </p>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_microservices_sec5_p3">
+                Three days, six PRs, three contributors. The true value of this work was not the dozen lines of code altered in any single PR, but that the architectural shape chosen early on became the single point of convergence during the package-wide overhaul—and that each thoroughly examined fix revealed the next.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="modal-btn modal-btn-secondary modal-close-trigger" data-i18n="modal_btn_close">Close</button>
+          <a href="https://github.com/nestjs/nest/pull/17781" target="_blank" class="modal-btn modal-btn-primary">
+            <i class="fab fa-github"></i> PR #17781
+          </a>
+          <a href="https://github.com/nestjs/nest/pull/17797" target="_blank" class="modal-btn modal-btn-primary">
+            <i class="fab fa-github"></i> PR #17797
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deep Dive Modal - PR #17668 (Validation & Type Coercion) -->
+    <div id="deep-dive-modal-17668" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-heading">
       <div class="modal-dialog">
         <div class="modal-header">
           <div class="modal-title-group">
@@ -267,90 +452,89 @@
               <span class="badge badge-tag" data-i18n="modal_badge_issue">Issue #17638</span>
               <span class="badge badge-author" data-i18n="modal_badge_merged">Merged by Kamil Mysliwiec</span>
             </div>
-            <h2 id="modal-title-heading" class="modal-title" data-i18n="modal_title">NestJS Core Contribution: Architecture Deep Dive</h2>
-            <p class="modal-subtitle" data-i18n="modal_subtitle">Pull Request #17668 · Merged into nestjs/nest master</p>
+            <h2 id="modal-title-heading" class="modal-title" data-i18n="modal_title">Numeric String Coercion in ParseEnumPipe</h2>
+            <p class="modal-subtitle" data-i18n="modal_subtitle">Pull Request #17668 · Strict Type-Safe Coercion for HTTP Route Parameters</p>
           </div>
-          <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">&times;</button>
+          <button type="button" class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
         </div>
 
         <div class="modal-body">
           <!-- Section 1 -->
           <div class="modal-section">
             <h3 class="modal-section-title">
-              <i class="fas fa-bug"></i> <span data-i18n="modal_sec1_title">1. Problem Discovery & Background</span>
+              <i class="fas fa-bug"></i> <span data-i18n="modal_sec1_title">1. Type Coercion Blind Spots in Route Parameters</span>
             </h3>
             <p data-i18n-html="modal_sec1_p1">
-              Encountered an unexpected validation failure when using <code>@Query()</code> with TypeScript numeric enums. While an AI assistant initially suggested a manual workaround at the controller layer, I recognized that HTTP query parameters naturally arrive as strings and the underlying <code>ParseEnumPipe</code> should natively validate and coerce them rather than throwing a 400 error. Further investigation with AI assistance located existing community Issue #17638, leading to an upstream fix.
+              In modern web APIs built with NestJS, route parameters received via <code>@Query()</code> or <code>@Param()</code> arrive over HTTP as raw strings (e.g. <code>?status=0</code> arrives as <code>'0'</code>). However, TypeScript developers commonly define status codes and flags as numeric enums.
             </p>
             <p data-i18n-html="modal_sec1_p2">
-              The root cause: client requests send <code>?status=0</code>, which Express/Fastify parses as the string <code>'0'</code>. In previous versions, <code>ParseEnumPipe.isEnum()</code> strictly checked <code>[0, 1].includes('0')</code>, evaluating to <code>false</code> and unexpectedly throwing <code>400 Bad Request: "Validation failed (enum string is expected)"</code>.
+              In previous versions, <code>ParseEnumPipe.isEnum()</code> verified values using a strict array check (<code>[0, 1].includes('0')</code>). Because JavaScript strict equality (<code>===</code>) distinguishes strings from numbers, this comparison evaluated to <code>false</code>, unexpectedly throwing <code>400 Bad Request: "Validation failed (enum string is expected)"</code>.
             </p>
+            <div class="modal-alert-box">
+              <p data-i18n-html="modal_sec1_p3">
+                While developers previously resorted to repetitive manual parsing inside individual controllers, HTTP query parameters naturally arrive as strings. Implementing native, type-safe coercion inside the framework's core <code>ParseEnumPipe</code> provided a far more robust, ecosystem-wide solution.
+              </p>
+            </div>
           </div>
 
           <!-- Section 2 -->
           <div class="modal-section">
             <h3 class="modal-section-title">
-              <i class="fas fa-shield-alt"></i> <span data-i18n="modal_sec2_title">2. Community Issue & PR #17668</span>
+              <i class="fas fa-shield-alt"></i> <span data-i18n="modal_sec2_title">2. Strict Type Safety & Coercion Architecture</span>
             </h3>
             <p data-i18n-html="modal_sec2_p1">
-              Another PR (#17639) had initially been submitted by a community member. However, that contributor's environment was unfortunately compromised by an automated worm, force-pushing malicious payloads disguised in a <code>.woff2</code> font file and automation scripts.
+              The design required careful consideration: a loose approach using regular expressions combined with <code>Number(value)</code> would unintentionally coerce ambiguous inputs—such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>—violating strict TypeScript enum semantics.
             </p>
-            <div class="modal-alert-box">
-              <p data-i18n-html="modal_sec2_p2">
-                NestJS maintainer <code>@micalevisk</code> promptly identified the security risk and closed the compromised PR, with the team subsequently introducing guardrails to protect against malicious PR payloads.
+            <p data-i18n-html="modal_sec2_p2">
+              To ensure rigorous type safety and backward compatibility, <code>toEnumValue</code> evaluates two distinct conditions: preserving strict identity comparison for standard inputs, and enabling string literal matching exclusively when an enum member is a number and input is a string:
+            </p>
+            <pre class="modal-code-block"><code>protected toEnumValue(value: unknown): string | number | undefined {
+  return this.getEnumValues().find(
+    enumValue =>
+      enumValue === value ||
+      (typeof enumValue === 'number' &&
+        typeof value === 'string' &&
+        String(enumValue) === value),
+  );
+}</code></pre>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_sec2_p3">
+                This guaranteed zero regular expression overhead and rejected malformed inputs upfront, preserving strict enum typing while cleanly coercing valid numeric string representations into their canonical enum values.
               </p>
             </div>
-            <p data-i18n-html="modal_sec2_p3">
-              Following the closure of #17639, my clean and independent implementation in <strong>PR #17668</strong> provided a secure and complete solution, allowing the maintainers to smoothly address the issue.
-            </p>
           </div>
 
           <!-- Section 3 -->
           <div class="modal-section">
             <h3 class="modal-section-title">
-              <i class="fas fa-code-branch"></i> <span data-i18n="modal_sec3_title">3. Technical Decisions & Type Safety</span>
+              <i class="fas fa-vial"></i> <span data-i18n="modal_sec3_title">3. Testing Matrix & Official Memoization</span>
             </h3>
             <p data-i18n-html="modal_sec3_p1">
-              <strong>Risks of Loose Coercion:</strong> A naive approach using <code>isNumeric</code> regex and <code>Number(value)</code> would inadvertently accept ambiguous inputs such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>.
+              A comprehensive Vitest test suite was authored to validate the implementation across enum variations and edge cases:
             </p>
+            <ul class="modal-list">
+              <li data-i18n-html="modal_sec3_li1">
+                <strong>Strict edge case rejections:</strong> Explicitly asserted that ambiguous numeric inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.
+              </li>
+              <li data-i18n-html="modal_sec3_li2">
+                <strong>Comprehensive enum coverage:</strong> Validated seamless compatibility across string enums, numeric enums, mixed enums, and float-valued enums.
+              </li>
+              <li data-i18n-html="modal_sec3_li3">
+                <strong>Extensibility:</strong> Cleanly structured protected methods with accurate <code>getEnumValues(): (string | number)[]</code> typing.
+              </li>
+            </ul>
             <div class="modal-highlight-box">
               <p data-i18n-html="modal_sec3_p2">
-                <strong>Design Requirement:</strong> Enum validation must maintain strict type boundaries, accepting only exact string representations of defined enum members (e.g., matching <code>'0'</code> to <code>0</code>, but rejecting <code>'00'</code> or <code>'1.0'</code>).
+                NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the PR and contributed a follow-up commit (<code>perf(common): memoize enum values lookup</code>) to cache enum lookups across HTTP requests, subsequently merging PR #17668 into the master branch.
               </p>
             </div>
-            <p data-i18n-html="modal_sec3_p3">
-              <strong>Final Architecture:</strong> Implemented exact string matching via <code>toEnumValue</code> (<code>String(enumValue) === value</code>). This eliminated regex overhead and redundant passes in <code>transform()</code>, guaranteeing strict enum type safety.
-            </p>
-          </div>
-
-          <!-- Section 4 -->
-          <div class="modal-section">
-            <h3 class="modal-section-title">
-              <i class="fas fa-vial"></i> <span data-i18n="modal_sec4_title">4. Edge Cases & Jest Testing</span>
-            </h3>
-            <p data-i18n="modal_sec4_p1">Authored comprehensive Jest unit tests covering:</p>
-            <ul class="modal-list">
-              <li data-i18n-html="modal_sec4_li1">Edge case rejections: Explicitly asserted that ambiguous inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.</li>
-              <li data-i18n-html="modal_sec4_li2">Enum variants: Validated compatibility across string enums, numeric enums, mixed enums, and float-valued enums.</li>
-              <li data-i18n-html="modal_sec4_li3">Extensibility: Streamlined protected methods and properly typed <code>getEnumValues(): (string | number)[]</code>.</li>
-            </ul>
-          </div>
-
-          <!-- Section 5 -->
-          <div class="modal-section">
-            <h3 class="modal-section-title">
-              <i class="fas fa-rocket"></i> <span data-i18n="modal_sec5_title">5. Optimization & Official Merge</span>
-            </h3>
-            <p data-i18n-html="modal_sec5_p1">
-              NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the implementation, added a follow-up optimization commit (<code>perf(common): memoize enum values lookup</code>) to cache enum values across requests, and officially merged PR #17668 into the master branch.
-            </p>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="modal-btn modal-btn-secondary" id="modal-footer-close-btn" data-i18n="modal_btn_close">Close</button>
+          <button type="button" class="modal-btn modal-btn-secondary modal-close-trigger" data-i18n="modal_btn_close">Close</button>
           <a href="https://github.com/nestjs/nest/pull/17668" target="_blank" class="modal-btn modal-btn-primary">
-            <i class="fab fa-github"></i> <span data-i18n="modal_btn_view_pr">View on GitHub</span>
+            <i class="fab fa-github"></i> PR #17668
           </a>
         </div>
       </div>

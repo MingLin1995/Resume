@@ -18,47 +18,83 @@ const translations = {
     section_project: "Projects",
     section_freelance: "Freelance Experience",
 
-    // NestJS Open Source Card (Concise)
+    // --- Combined Microservices Observability Series (PR #17781 & #17797) ---
+    oss_nest_microservices_title: "NestJS Core (@nestjs/microservices)",
+    oss_nest_microservices_badge_merged: "Merged",
+    oss_nest_microservices_pr_link_title: "PR #17781 & #17797: Resolving Observability Span Leaks in Microservices",
+    oss_nest_microservices_summary_1: "<strong>Event Pipeline Lifecycle (PR #17781):</strong> Identified that unhandled rejections bypassed <code>onProcessingEndHook</code>, leaving OpenTelemetry/APM spans unclosed; designed <code>createProcessingEndHookRunner</code> on base <code>Server</code> to guarantee idempotent teardown across asynchronous execution paths.",
+    oss_nest_microservices_summary_2: "<strong>Framework-Wide Adoption:</strong> The idempotent runner pattern was officially adopted across NestJS transport layers (MQTT, NATS, Redis, TCP, RMQ), standardizing end-hook execution during failure handling.",
+    oss_nest_microservices_summary_3: "<strong>Kafka Retries & Streams (PR #17797):</strong> Resolved complex edge cases in <code>ServerKafka</code>: prevented duplicate span closures across multi-value streams and eliminated compounding span leaks during <code>KafkaRetriableException</code> retry cycles.",
+    btn_deep_dive_microservices: "Deep Dive: Architectural Details",
+
+    // Deep Dive Modal - Unified Microservices Series
+    modal_microservices_title: "Observability Lifecycle in NestJS Microservices",
+    modal_microservices_subtitle: "Resolving Telemetry Span Leaks in Failure Paths & Distributed Retries (PR #17781 & #17797)",
+    modal_microservices_fact: "2 merged PRs · #17781, #17797 · nestjs/nest · September 2026 · Part of a 6-PR remediation chain",
+    modal_microservices_badge_pr1: "PR #17781",
+    modal_microservices_badge_pr2: "PR #17797",
+    modal_microservices_badge_merged: "Merged by Kamil Mysliwiec",
+
+    modal_microservices_sec1_title: "1. A Defect That Would Never Be Reported",
+    modal_microservices_sec1_p1: "<code>setOnProcessingStartHook</code> and <code>setOnProcessingEndHook</code> are extension points exposed by NestJS for observability integrations, with zero consumers inside the repository or its dependencies—standard NestJS applications never invoke them. There are no stack traces, no failing requests, and no users opening issues.",
+    modal_microservices_sec1_p2: "Defects of this kind can only be uncovered proactively. The catalyst was PR #17766: <code>ServerKafka#handleEvent</code> only closed its span upon successful completion, and that fix introduced RxJS <code>finalize()</code> to encompass both complete and error terminations. The fix was correct on its own terms, but prompted a crucial question: did the same class of defect still exist in the base class from which Kafka inherits?",
+
+    modal_microservices_sec2_title: "2. Observability Blind Spots on Failing Paths",
+    modal_microservices_sec2_p1: "In distributed microservice architectures, observability tools (such as OpenTelemetry, Datadog, and Sentry) rely on spans to profile latency and capture error diagnostics. The start hook establishes the async trace context so every log line and query inside the handler attributes to one span; the end hook closes and exports it upon completion.",
+    modal_microservices_sec2_p2: "In the base <code>Server#handleEvent</code> pipeline, execution awaited the handler before evaluating completion branches (RxJS Observables vs. plain values). Both branches were implemented correctly, but when a handler rejected, the <code>await</code> expression threw immediately before either branch was evaluated. Teardown logic was bypassed entirely, leaving <code>onProcessingEndHook</code> uncalled.",
+    modal_microservices_sec2_p3: "The consequence: during system outages—the exact moments engineers rely on traces most—failing events failed to produce telemetry. In high-throughput services processing malformed payloads, unclosed spans persisted in memory indefinitely, creating memory bloat while leaving monitoring systems blind to failures.",
+
+    modal_microservices_sec3_title: "3. Idempotent Teardown Architecture on the Base Class",
+    modal_microservices_sec3_p1: "A naive fix might wrap the handler invocation in <code>try/catch</code>, execute the end hook upon catching the error, and rethrow. However, in transports that await stream resolution to acknowledge message settlement (such as Kafka offset commits), an erroring stream triggers both RxJS <code>finalize</code> and the outer catch block. Without protection, a single event triggers the end hook twice, corrupting trace state.",
+    modal_microservices_sec3_p2: "To fundamentally resolve this across transports, the solution was elevated to the base class as <code>Server#createProcessingEndHookRunner</code>, encapsulating both idempotency protection and the event's context in a closure:",
+    modal_microservices_sec3_p3: "This established a strict invariant: <em>\"the span closes safely exactly once, via whichever asynchronous path settles first\"</em>. Following PR #17781, NestJS creator Kamil Mysliwiec adopted this exact pattern in #17794 across MQTT, NATS, Redis, TCP, and RMQ, establishing a unified teardown standard across transports.",
+
+    modal_microservices_sec4_title: "4. Kafka Retry Boundaries & Stream Convergence",
+    modal_microservices_sec4_p1: "The generalization covered five transports but left Kafka untouched. Reading the implementation with the same critical eye revealed three remaining unhandled edge cases:",
+    modal_microservices_sec4_li1: "<strong>Multi-value stream emissions:</strong> <code>onProcessingEndHook</code> originally lived inside <code>sendMessage</code>, executing per emitted packet; when a stream emitted multiple replies, the same span was closed multiple times.",
+    modal_microservices_sec4_li2: "<strong>Compounding leaks from retriable errors:</strong> When a handler threw <code>KafkaRetriableException</code>, <code>combineStreamsAndThrowIfRetriable</code> rejected, halting execution before message dispatch and leaving the span unsettled. Because <code>kafkajs</code> automatically redelivers retriable messages, every retry leaked another unsettled span, creating compounding memory bloat in production.",
+    modal_microservices_sec4_li3: "<strong>Unpaired calls on unhandled paths:</strong> The <code>NO_MESSAGE_HANDLER</code> path published a response without ever invoking a start hook, causing an unpaired end hook execution (the same unpaired invocation #17794 removed from MQTT, NATS, and Redis).",
+    modal_microservices_sec4_p2: "In <strong>PR #17797</strong>, the hook was decoupled into the response stream's <code>finalize</code> operator, governed by the idempotent runner, while an outer <code>try/catch</code> settled the span before rethrowing <code>KafkaRetriableException</code>. This preserved Kafka's native retry behavior while guaranteeing that spans close <strong>Exactly-Once</strong>. During code review, maintainers contributed an adjacent edge case: observables completing without emitting values failed to resolve internal promises, similarly causing unsettled trace states.",
+
+    modal_microservices_sec5_title: "5. The Single Call Site",
+    modal_microservices_sec5_p1: "Within hours, this line of remediation advanced two further PRs. #17779 tackled the gRPC request-stream path, discovering along the way that <code>grpc-js</code> never actually emits an <code>error</code> event—cancellations are signaled via <code>cancelled</code> and <code>close</code>, meaning existing cancellation teardown had never executed in production. #17799 then consolidated the ad-hoc exception scaffolding across all transports into <code>Server#runWithProcessingHooks</code>, routing every transport through it uniformly.",
+    modal_microservices_sec5_p2: "Following that refactor, throughout the entire <code>@nestjs/microservices</code> package, <code>onProcessingEndHook</code> retained only a single call site—housed directly inside the idempotent guard introduced in #17781. The surrounding code was completely rewritten; the guard remained.",
+    modal_microservices_sec5_p3: "Three days, six PRs, three contributors. The true value of this work was not the dozen lines of code altered in any single PR, but that the architectural shape chosen early on became the single point of convergence during the package-wide overhaul—and that each thoroughly examined fix revealed the next.",
+
+    // --- PR #17668: Common Validation ---
     oss_nest_title: "NestJS Core (@nestjs/common)",
     oss_nest_badge_merged: "Merged",
     oss_nest_pr_link_title: "PR #17668: Support numeric string values in ParseEnumPipe",
     oss_nest_summary_1: "<strong>Problem Discovery & Root Cause:</strong> Identified an unexpected validation failure when using <code>@Query()</code> with numeric enums, traced framework internals, and investigated community Issue #17638.",
     oss_nest_summary_2: "<strong>Strict Architecture:</strong> Designed a type-safe coercion mechanism using exact string matching (<code>toEnumValue</code>), rejecting malformed edge cases (e.g. <code>'01'</code>, <code>'-0'</code>, <code>'1.0'</code>) to guarantee backward compatibility.",
-    oss_nest_summary_3: "<strong>Official Review & Merge:</strong> Authored comprehensive Jest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.",
-    btn_deep_dive: "Deep Dive Architecture",
+    oss_nest_summary_3: "<strong>Official Review & Merge:</strong> Authored comprehensive Vitest test suites covering strict type boundaries; officially reviewed, optimized with memoization, and merged by creator Kamil Mysliwiec.",
+    btn_deep_dive: "Deep Dive: Architectural Details",
 
-    // Deep Dive Modal
-    modal_title: "NestJS Core Contribution: Architecture Deep Dive",
-    modal_subtitle: "Pull Request #17668 · Merged into nestjs/nest master",
+    // Deep Dive Modal - PR #17668
+    modal_title: "Numeric String Coercion in ParseEnumPipe",
+    modal_subtitle: "Pull Request #17668 · Strict Type-Safe Coercion for HTTP Route Parameters",
     modal_badge_pr: "PR #17668",
     modal_badge_issue: "Issue #17638",
     modal_badge_merged: "Merged by Kamil Mysliwiec",
 
-    modal_sec1_title: "1. Problem Discovery & Background",
-    modal_sec1_p1: "Encountered an unexpected validation failure when using <code>@Query()</code> with TypeScript numeric enums. While an AI assistant initially suggested a manual workaround at the controller layer, I recognized that HTTP query parameters naturally arrive as strings and the underlying <code>ParseEnumPipe</code> should natively validate and coerce them rather than throwing a 400 error. Further investigation with AI assistance located existing community Issue #17638, leading to an upstream fix.",
-    modal_sec1_p2: "The root cause: client requests send <code>?status=0</code>, which Express/Fastify parses as the string <code>'0'</code>. In previous versions, <code>ParseEnumPipe.isEnum()</code> strictly checked <code>[0, 1].includes('0')</code>, evaluating to <code>false</code> and unexpectedly throwing <code>400 Bad Request: \"Validation failed (enum string is expected)\"</code>.",
+    modal_sec1_title: "1. Type Coercion Blind Spots in Route Parameters",
+    modal_sec1_p1: "In modern web APIs built with NestJS, route parameters received via <code>@Query()</code> or <code>@Param()</code> arrive over HTTP as raw strings (e.g. <code>?status=0</code> arrives as <code>'0'</code>). However, TypeScript developers commonly define status codes and flags as numeric enums.",
+    modal_sec1_p2: "In previous versions, <code>ParseEnumPipe.isEnum()</code> verified values using a strict array check (<code>[0, 1].includes('0')</code>). Because JavaScript strict equality (<code>===</code>) distinguishes strings from numbers, this comparison evaluated to <code>false</code>, unexpectedly throwing <code>400 Bad Request: \"Validation failed (enum string is expected)\"</code>.",
+    modal_sec1_p3: "While developers previously resorted to repetitive manual parsing inside individual controllers, HTTP query parameters naturally arrive as strings. Implementing native, type-safe coercion inside the framework's core <code>ParseEnumPipe</code> provided a far more robust, ecosystem-wide solution.",
 
-    modal_sec2_title: "2. Community Issue & PR #17668",
-    modal_sec2_p1: "Another PR (#17639) had initially been submitted by a community member. However, that contributor's environment was unfortunately compromised by an automated worm, force-pushing malicious payloads disguised in a <code>.woff2</code> font file and automation scripts.",
-    modal_sec2_p2: "NestJS maintainer <code>@micalevisk</code> promptly identified the security risk and closed the compromised PR, with the team subsequently introducing guardrails to protect against malicious PR payloads.",
-    modal_sec2_p3: "Following the closure of #17639, my clean and independent implementation in <strong>PR #17668</strong> provided a secure and complete solution, allowing the maintainers to smoothly address the issue.",
+    modal_sec2_title: "2. Strict Type Safety & Coercion Architecture",
+    modal_sec2_p1: "The design required careful consideration: a loose approach using regular expressions combined with <code>Number(value)</code> would unintentionally coerce ambiguous inputs—such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>—violating strict TypeScript enum semantics.",
+    modal_sec2_p2: "To ensure rigorous type safety and backward compatibility, <code>toEnumValue</code> evaluates two distinct conditions: preserving strict identity comparison for standard inputs, and enabling string literal matching exclusively when an enum member is a number and input is a string:",
+    modal_sec2_p3: "This guaranteed zero regular expression overhead and rejected malformed inputs upfront, preserving strict enum typing while cleanly coercing valid numeric string representations into their canonical enum values.",
 
-    modal_sec3_title: "3. Technical Decisions & Type Safety",
-    modal_sec3_p1: "<strong>Risks of Loose Coercion:</strong> A naive approach using <code>isNumeric</code> regex and <code>Number(value)</code> would inadvertently accept ambiguous inputs such as <code>'00'</code>, <code>'01'</code>, <code>'1.0'</code>, or <code>'-0'</code>.",
-    modal_sec3_p2: "<strong>Design Requirement:</strong> Enum validation must maintain strict type boundaries, accepting only exact string representations of defined enum members (e.g., matching <code>'0'</code> to <code>0</code>, but rejecting <code>'00'</code> or <code>'1.0'</code>).",
-    modal_sec3_p3: "<strong>Final Architecture:</strong> Implemented exact string matching via <code>toEnumValue</code> (<code>String(enumValue) === value</code>). This eliminated regex overhead and redundant passes in <code>transform()</code>, guaranteeing strict enum type safety.",
-
-    modal_sec4_title: "4. Edge Cases & Jest Testing",
-    modal_sec4_p1: "Authored comprehensive Jest unit tests covering:",
-    modal_sec4_li1: "Edge case rejections: Explicitly asserted that ambiguous inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.",
-    modal_sec4_li2: "Enum variants: Validated compatibility across string enums, numeric enums, mixed enums, and float-valued enums.",
-    modal_sec4_li3: "Extensibility: Streamlined protected methods and properly typed <code>getEnumValues(): (string | number)[]</code>.",
-
-    modal_sec5_title: "5. Optimization & Official Merge",
-    modal_sec5_p1: "NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the implementation, added a follow-up optimization commit (<code>perf(common): memoize enum values lookup</code>) to cache enum values across requests, and officially merged PR #17668 into the master branch.",
+    modal_sec3_title: "3. Testing Matrix & Official Memoization",
+    modal_sec3_p1: "A comprehensive Vitest test suite was authored to validate the implementation across enum variations and edge cases:",
+    modal_sec3_li1: "<strong>Strict edge case rejections:</strong> Explicitly asserted that ambiguous numeric inputs like <code>'01'</code>, <code>'1.0'</code>, and <code>'-0'</code> throw <code>BadRequestException</code>.",
+    modal_sec3_li2: "<strong>Comprehensive enum coverage:</strong> Validated seamless compatibility across string enums, numeric enums, mixed enums, and float-valued enums.",
+    modal_sec3_li3: "<strong>Extensibility:</strong> Cleanly structured protected methods with accurate <code>getEnumValues(): (string | number)[]</code> typing.",
+    modal_sec3_p2: "NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the PR and contributed a follow-up commit (<code>perf(common): memoize enum values lookup</code>) to cache enum lookups across HTTP requests, subsequently merging PR #17668 into the master branch.",
 
     modal_btn_close: "Close",
-    modal_btn_view_pr: "View on GitHub",
 
     // Other Projects
     proj_crypto_v2_title: "Crypto-Sniper V2",
@@ -112,47 +148,83 @@ const translations = {
     section_project: "個人專案 (Projects)",
     section_freelance: "接案經歷 (Freelance)",
 
-    // NestJS Open Source Card (Concise)
+    // --- Combined Microservices Observability Series (PR #17781 & #17797) ---
+    oss_nest_microservices_title: "NestJS 官方核心庫 (@nestjs/microservices)",
+    oss_nest_microservices_badge_merged: "已合併 (Merged)",
+    oss_nest_microservices_pr_link_title: "PR #17781 & #17797: 修復微服務事件管線與 Kafka 中的 Span 洩漏問題",
+    oss_nest_microservices_summary_1: "<strong>事件管線生命週期治理（PR #17781）：</strong> 分析事件處理器 reject 拋錯時會跳過 <code>onProcessingEndHook</code>，導致 OpenTelemetry / APM 追蹤 Span 未能閉合；於基底 <code>Server</code> 引入具冪等特性的 <code>createProcessingEndHookRunner</code>，防範非同步執行時的重複 teardown。",
+    oss_nest_microservices_summary_2: "<strong>官方跨傳輸層採納：</strong> 冪等防護機制獲官方套用於 MQTT、NATS、Redis、TCP 與 RMQ 等多種傳輸層，統一了微服務在異常路徑上的 Hook 執行標準。",
+    oss_nest_microservices_summary_3: "<strong>Kafka 重試邊界與串流收斂（PR #17797）：</strong> 深入梳理 <code>ServerKafka</code> 請求回應管線：修正多值串流重複關閉 Span 的問題，並修復 <code>KafkaRetriableException</code> 在自動重試過程中持續累積未閉合 Span 的隱患。",
+    btn_deep_dive_microservices: "詳細架構解析 (Deep Dive)",
+
+    // Deep Dive Modal - Unified Microservices Series
+    modal_microservices_title: "NestJS 微服務 Observability 生命週期治理",
+    modal_microservices_subtitle: "修復異常路徑與分散式重試中的追蹤 Span 洩漏問題（PR #17781 & #17797）",
+    modal_microservices_fact: "2 merged PRs · #17781, #17797 · nestjs/nest · 2026 年 9 月 · 六個 PR 修正線的一環",
+    modal_microservices_badge_pr1: "PR #17781",
+    modal_microservices_badge_pr2: "PR #17797",
+    modal_microservices_badge_merged: "由創辦人 Kamil Mysliwiec 合併",
+
+    modal_microservices_sec1_title: "1. 一個不會被回報的缺陷",
+    modal_microservices_sec1_p1: "<code>setOnProcessingStartHook</code> 與 <code>setOnProcessingEndHook</code> 是 NestJS 開放給監控整合的擴充點，在整個 repository 與其相依套件中沒有任何消費者——一般的 NestJS 應用完全不會觸發它。沒有 stack trace，沒有失敗請求，不會有使用者開 issue。",
+    modal_microservices_sec1_p2: "這類缺陷只能主動去找。起點是 PR #17766：<code>ServerKafka#handleEvent</code> 僅在串流正常完成時閉合 Span，該修正改以 RxJS <code>finalize()</code> 涵蓋完成與失敗兩種終止。修正本身正確，但留下一個值得追問的問題——同一類錯誤，在 Kafka 所繼承的基底類別裡是否依然存在？",
+
+    modal_microservices_sec2_title: "2. 異常路徑上的可觀測性盲點",
+    modal_microservices_sec2_p1: "在分散式微服務架構中，監控工具（如 OpenTelemetry、Datadog、Sentry）仰賴 Span 來分析請求延遲與捕捉異常診斷。start hook 負責初始化非同步追蹤上下文，使處理器內部的每一筆日誌與查詢都歸屬於同一條 Span；end hook 則在處理結束時閉合並輸出該 Span。",
+    modal_microservices_sec2_p2: "在基底 <code>Server#handleEvent</code> 的管線中，流程會先 <code>await</code> 處理器的執行結果，再依回傳值型態（RxJS Observable 或純值）分流至對應的結束邏輯。兩條分支的實作都正確，但當處理器本身 reject 時，<code>await</code> 會在任一分支被求值之前即中斷拋出，導致結束邏輯全數被跳過，<code>onProcessingEndHook</code> 未被觸發。",
+    modal_microservices_sec2_p3: "其結果是：在系統發生故障時，最需要排查定位的失敗事件，反而未能產出完整的 Trace 紀錄。在持續接收異常資料的高吞吐服務中，未閉合的 Span 更會滯留於記憶體中，既造成資源負擔，也使監控系統失去即時追蹤能力。",
+
+    modal_microservices_sec3_title: "3. 基底類別的冪等防護設計",
+    modal_microservices_sec3_p1: "直覺的修復方式是在處理器外圍加上 <code>try/catch</code>，捕捉異常後執行 end hook 再重新拋出。然而在特定傳輸協定中（例如 Kafka 需等待串流以確認 Offset Commit），失敗的串流會同時觸發 RxJS 的 <code>finalize</code> 與外層的 catch 區塊；若缺乏防護，同一個事件將重複觸發 end hook，造成追蹤狀態錯亂。",
+    modal_microservices_sec3_p2: "為了從根本解決此問題，解法提升至基底類別，設計 <code>Server#createProcessingEndHookRunner</code>，透過閉包同時封裝冪等防護與該次事件的上下文：",
+    modal_microservices_sec3_p3: "這項設計確立了明確的不變性：「無論哪條非同步路徑先抵達，Span 均確保單次安全閉合」。PR #17781 合併後，專案作者隨即於 #17794 沿用此模式，推廣至 MQTT、NATS、Redis、TCP 與 RMQ 等傳輸層，建立統一的異常終結標準。",
+
+    modal_microservices_sec4_title: "4. Kafka 重試邊界與串流收斂",
+    modal_microservices_sec4_p1: "上述泛化涵蓋五個傳輸層，但未觸及 Kafka。以同一種方式閱讀該修正，可辨識出三個仍未被處理的邊界情境：",
+    modal_microservices_sec4_li1: "<strong>多值串流重複觸發：</strong> <code>onProcessingEndHook</code> 原先置於 <code>sendMessage</code> 內部，每發送一則訊息便執行一次；串流發出多筆回覆時，同一個 Span 便會被重複關閉多次。",
+    modal_microservices_sec4_li2: "<strong>可重試異常導致的累積殘留：</strong> 處理器拋出 <code>KafkaRetriableException</code> 時，<code>combineStreamsAndThrowIfRetriable</code> 選擇 reject，流程在進入發送階段前即中斷，Span 未能結算。而 <code>kafkajs</code> 隨後會重新投遞該訊息——每一次重試都再殘留一個未結算的 Span，於線上環境形成持續累積的記憶體負擔。",
+    modal_microservices_sec4_li3: "<strong>無處理器路徑的未配對呼叫：</strong> <code>NO_MESSAGE_HANDLER</code> 分支在未執行 start hook 的情況下直接發送回應，使該次 end hook 形成無配對的呼叫（如同 #17794 自 MQTT、NATS 與 Redis 移除的未配對呼叫）。",
+    modal_microservices_sec4_p2: "於 <strong>PR #17797</strong> 中，將 Hook 抽離至回應串流的 <code>finalize</code> 管道，統一交由前述的冪等 runner 控管，並在外層提前捕捉 <code>KafkaRetriableException</code> 完成 Span 結算後再重新拋出。在維持 Kafka 原生重試特性的前提下，達成 Span「<strong>精確只關閉一次（Exactly-Once）</strong>」的嚴謹保證。Review 階段另由維護者補上一項相鄰情境：空串流在未發出任何資料即完成時未正確 resolve promise，同樣會使追蹤狀態懸置。",
+
+    modal_microservices_sec5_title: "5. 一個呼叫點",
+    modal_microservices_sec5_p1: "其後數小時內，這條修正線又推進兩個 PR。#17779 處理 gRPC 的 request-stream 路徑，過程中發現 <code>grpc-js</code> 實際上從不發出 <code>error</code> 事件——取消是以 <code>cancelled</code> 與 <code>close</code> 通報，因此原有的取消處理在正式環境從未執行。#17799 則將各傳輸層手寫的整套例外外殼全數收斂至 <code>Server#runWithProcessingHooks</code>，並令所有傳輸層一律經由它處理。",
+    modal_microservices_sec5_p2: "在那場重構之後，整個 microservices 套件中，<code>onProcessingEndHook</code> 只剩下唯一一個呼叫點——位於 #17781 所引入的冪等防護內部。周圍的實作被全部替換，這道保護被保留了下來。",
+    modal_microservices_sec5_p3: "三天、六個 PR、三位貢獻者。這次工作的價值不在任一 PR 中改變行為的十餘行程式碼，而在於早期所選的抽象形狀成為整個套件重構時的單一收斂點；也在於每一次仔細讀完一個修正，都會浮現出下一個。",
+
+    // --- PR #17668: Common Validation ---
     oss_nest_title: "NestJS 官方核心庫 (@nestjs/common)",
     oss_nest_badge_merged: "已合併 (Merged)",
     oss_nest_pr_link_title: "PR #17668: 支援 ParseEnumPipe 數值字串型態轉換",
     oss_nest_summary_1: "<strong>實戰發現與定位 Issue #17638：</strong> 於專案實作 <code>@Query()</code> 搭配數值列舉時發現驗證異常，主動探究框架底層機制，並追蹤定位至官方 Issue #17638 提出修復。",
     oss_nest_summary_2: "<strong>嚴謹架構設計：</strong> 設計型別安全的轉型機制（<code>toEnumValue</code>），採用精確字串比對，嚴格拒絕模糊的邊界案例（如 <code>'01'</code>、<code>'-0'</code>、<code>'1.0'</code>），確保向下相容與型別嚴謹。",
-    oss_nest_summary_3: "<strong>官方 Review 與合併：</strong> 完整補齊 Jest 單元測試與型別邊界防禦，由 NestJS 創始人 Kamil Mysliwiec 親自 Review、追加記憶化優化並順利合併進 master 分支。",
+    oss_nest_summary_3: "<strong>官方 Review 與合併：</strong> 完整補齊 Vitest 單元測試與型別邊界防禦，由 NestJS 創始人 Kamil Mysliwiec 親自 Review、追加記憶化優化並順利合併進 master 分支。",
     btn_deep_dive: "詳細架構解析 (Deep Dive)",
 
-    // Deep Dive Modal
-    modal_title: "NestJS 核心貢獻：架構與設計解析",
-    modal_subtitle: "Pull Request #17668 · 已合併至 nestjs/nest master 分支",
+    // Deep Dive Modal - PR #17668
+    modal_title: "ParseEnumPipe 數值字串型態轉換機制",
+    modal_subtitle: "Pull Request #17668 · HTTP 路由參數之嚴格型別安全轉換",
     modal_badge_pr: "PR #17668",
     modal_badge_issue: "Issue #17638",
     modal_badge_merged: "由創辦人 Kamil Mysliwiec 合併",
 
-    modal_sec1_title: "1. 問題發現與背景",
-    modal_sec1_p1: "在開發中使用 <code>@Query()</code> 搭配 TypeScript 數值列舉時遇到驗證異常。AI 最初建議在 Controller 層手動轉換繞過，但我指出 HTTP 查詢參數以純字串傳遞屬於常見場景，框架底層的 <code>ParseEnumPipe</code> 應當原生支援數值轉換而非直接拋出 400 錯誤。進一步深入追查後，AI 協助檢索到官方社群已有人回報相同問題（Issue #17638），隨即展開深入修復。",
-    modal_sec1_p2: "問題根源在於：客戶端傳入 <code>?status=0</code> 時，底層收到的為純字串 <code>'0'</code>。舊版 <code>ParseEnumPipe.isEnum()</code> 直接以嚴格比對 <code>[0, 1].includes('0')</code> 檢查，導致比對結果為 <code>false</code>，並拋出 <code>400 Bad Request: \"Validation failed (enum string is expected)\"</code>。",
+    modal_sec1_title: "1. 路由參數型別校驗的設計盲點",
+    modal_sec1_p1: "在基於 NestJS 構建的 REST API 中，透過 <code>@Query()</code> 或 <code>@Param()</code> 傳入的 HTTP 請求參數本質上均為純字串（例如 <code>?status=0</code> 進入後端為 <code>'0'</code>）。而在 TypeScript 開發中，狀態代碼或開關常被定義為數值型列舉（例如 <code>enum Status { Active = 0, Inactive = 1 }</code>）。",
+    modal_sec1_p2: "在舊版實作中，<code>ParseEnumPipe.isEnum()</code> 採用陣列嚴格比對（<code>[0, 1].includes('0')</code>）。由於 JavaScript 嚴格等於（<code>===</code>）區分字串與數值，比對結果為 <code>false</code>，導致框架非預期地直接拋出 <code>400 Bad Request: \"Validation failed (enum string is expected)\"</code>。",
+    modal_sec1_p3: "雖然業務層可以在各個 Controller 手動轉換繞過，但 HTTP 參數以字串傳遞屬於 Web 標準常態；由框架底層的 <code>ParseEnumPipe</code> 原生支援數值轉換，才能徹底為整體生態系提供一致且高相容性的開發體驗。",
 
-    modal_sec2_title: "2. 社群 Issue 與 PR #17668",
-    modal_sec2_p1: "該 Issue 原本有另一位開發者提交了 PR #17639。然而該作者的本機環境不幸遭自動化惡意蠕蟲感染，其 PR 被強推了夾帶惡意程式的 <code>.woff2</code> 與自動觸發工作流。",
-    modal_sec2_p2: "NestJS 維護者 <code>@micalevisk</code> 及時察覺異常並關閉了該 PR，官方隨後也建立了防護惡意 PR 的安全工作流。",
-    modal_sec2_p3: "在 #17639 關閉後，我提交的 <strong>PR #17668</strong> 提供了乾淨、獨立且包含完整測試的實作，讓官方團隊與社群得以聚焦並順利完成修復。",
+    modal_sec2_title: "2. 型別嚴謹度與精確轉型架構",
+    modal_sec2_p1: "這項修正的架構關鍵在於型別嚴謹度：若採用寬鬆的正則表達式搭配 <code>Number(value)</code> 轉型，會導致 <code>'00'</code>、<code>'01'</code>、<code>'1.0'</code> 或 <code>'-0'</code> 等模糊字串被錯誤視為合法成員，破壞 TypeScript 列舉的精確語意。",
+    modal_sec2_p2: "為了確保型別邊界與向下相容性，於 <code>toEnumValue</code> 設計兩層比對：保留原有的嚴格恆等比對，僅在「列舉值為 number 且輸入為 string」時啟用字面值轉型：",
+    modal_sec2_p3: "這種設計既避免了正則比對的額外開銷，又能嚴格拒絕不合規的邊界值，在確保零副作用的前提下，將合法的數值字串無縫轉型為對應的列舉型別。",
 
-    modal_sec3_title: "3. 架構決策與型別嚴謹度",
-    modal_sec3_p1: "<strong>寬鬆轉換的隱患：</strong> 早期思路曾考慮使用 <code>isNumeric</code> 正則搭配 <code>Number(value)</code> 轉型。但這會導致 <code>'00'</code>、<code>'01'</code>、<code>'1.0'</code> 或 <code>'-0'</code> 等模糊字串被錯誤轉換通過，破壞列舉的精確性。",
-    modal_sec3_p2: "<strong>設計準則：</strong> 列舉驗證必須保持嚴格性，僅能接受與合法 enum 成員字面完全相等的字串（例如 <code>'0'</code> 對應 <code>0</code>，但不接受 <code>'00'</code> 或 <code>'1.0'</code>）。",
-    modal_sec3_p3: "<strong>最終實作架構：</strong> 採用 <code>toEnumValue</code> 精確比對（<code>String(enumValue) === value</code>），不僅排除了邊界模糊數值，還避免正則判斷與額外遍歷，確保零額外開銷與型別安全。",
-
-    modal_sec4_title: "4. 邊界測試與單元驗證",
-    modal_sec4_p1: "撰寫完整的 Jest 單元測試，涵蓋各類邊界情境：",
-    modal_sec4_li1: "邊界防禦斷言：確保 <code>'01'</code>、<code>'1.0'</code> 與 <code>'-0'</code> 等模糊輸入均正確拋出 <code>BadRequestException</code>。",
-    modal_sec4_li2: "列舉類型覆蓋：驗證數值 Enum、字串 Enum、混合型 Enum 與包含浮點數的 Enum 均能正確處理。",
-    modal_sec4_li3: "方法擴充性：梳理 protected 方法，為 <code>getEnumValues()</code> 補齊 <code>(string | number)[]</code> 型別定義。",
-
-    modal_sec5_title: "5. 官方效能優化與合併",
-    modal_sec5_p1: "PR 提交後，NestJS 創始人 <strong>Kamil Mysliwiec</strong> 親自審查代碼，並在 PR 上追加了記憶化快取優化（<code>perf(common): memoize enum values lookup</code>）以避免每次請求重複計算列舉值，隨後正式將 PR #17668 合併進 master 分支。",
+    modal_sec3_title: "3. 邊界測試矩陣與官方快取最佳化",
+    modal_sec3_p1: "實作附帶了完整的 Vitest 單元測試矩陣，全面覆蓋各類列舉場景與防禦邊界：",
+    modal_sec3_li1: "<strong>邊界防禦斷言：</strong> 嚴格斷言 <code>'01'</code>、<code>'1.0'</code> 與 <code>'-0'</code> 等模糊輸入均正確被拒絕並拋出 <code>BadRequestException</code>。",
+    modal_sec3_li2: "<strong>完整列舉類型覆蓋：</strong> 確保數值列舉、字串列舉、混合型列舉與包含浮點數的列舉皆能正確解析。",
+    modal_sec3_li3: "<strong>架構擴充性：</strong> 梳理 protected 方法層級，為 <code>getEnumValues()</code> 補齊精確的 <code>(string | number)[]</code> 型別宣告。",
+    modal_sec3_p2: "PR 提交後，NestJS 創辦人 <strong>Kamil Mysliwiec</strong> 親自審查程式碼，追加了記憶化快取最佳化（<code>perf(common): memoize enum values lookup</code>）以避免每次請求重複計算列舉值，隨後順利將 PR #17668 合併至 master 分支。",
 
     modal_btn_close: "關閉",
-    modal_btn_view_pr: "前往 GitHub PR",
 
     // Other Projects
     proj_crypto_v2_title: "Crypto-Sniper V2",

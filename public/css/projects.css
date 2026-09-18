@@ -202,7 +202,9 @@
 
 .oss-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
   padding: 10px 0;
 }
 
@@ -216,6 +218,11 @@
   padding: 28px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
+}
+
+.oss-card-featured {
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
 }
 
 .oss-card:hover {
@@ -493,6 +500,20 @@
   color: #64748b;
 }
 
+.modal-fact-banner {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background-color: #f8fafc;
+  border-left: 3px solid #6366f1;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85em;
+  color: #475569;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .modal-close-btn {
   background: transparent;
   border: none;
@@ -592,6 +613,23 @@
   border-radius: 4px;
   font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.88em;
+}
+
+.modal-dialog pre {
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 14px 18px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.modal-dialog pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
 }
 
 .modal-footer {

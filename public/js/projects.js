@@ -31,60 +31,84 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Deep Dive Modal ---
-  const deepDiveModal = document.getElementById("deep-dive-modal");
-  const openDeepDiveBtn = document.getElementById("open-deep-dive-btn");
-  const closeDeepDiveBtn = document.getElementById("modal-close-btn");
-  const footerCloseDeepDiveBtn = document.getElementById("modal-footer-close-btn");
+  // --- Deep Dive Modals ---
+  const allModals = document.querySelectorAll(".modal-overlay:not(#image-lightbox)");
+  const openModalButtons = document.querySelectorAll("[data-modal-target]");
+  const legacyOpenBtn = document.getElementById("open-deep-dive-btn");
 
-  const isDeepDiveModalActive = () => {
-    return deepDiveModal && deepDiveModal.classList.contains("active");
+  const hasAnyActiveModal = () => {
+    return Array.from(allModals).some((modal) => modal.classList.contains("active"));
   };
 
-  const openDeepDive = () => {
-    if (deepDiveModal) {
-      deepDiveModal.classList.add("active");
+  const openModal = (modal) => {
+    if (modal) {
+      modal.classList.add("active");
       document.body.style.overflow = "hidden";
     }
   };
 
-  const closeDeepDive = () => {
-    if (deepDiveModal) {
-      deepDiveModal.classList.remove("active");
+  const closeModal = (modal) => {
+    if (modal) {
+      modal.classList.remove("active");
+      if (!hasAnyActiveModal() && !(lightbox && lightbox.classList.contains("active"))) {
+        document.body.style.overflow = "";
+      }
+    }
+  };
+
+  const closeAllModals = () => {
+    allModals.forEach((modal) => modal.classList.remove("active"));
+    if (!(lightbox && lightbox.classList.contains("active"))) {
       document.body.style.overflow = "";
     }
   };
 
-  if (openDeepDiveBtn) {
-    openDeepDiveBtn.addEventListener("click", openDeepDive);
-  }
+  // Bind data-modal-target buttons
+  openModalButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetSelector = btn.getAttribute("data-modal-target");
+      const targetModal = document.querySelector(targetSelector);
+      if (targetModal) {
+        openModal(targetModal);
+      }
+    });
+  });
 
-  if (closeDeepDiveBtn) {
-    closeDeepDiveBtn.addEventListener("click", closeDeepDive);
-  }
-
-  if (footerCloseDeepDiveBtn) {
-    footerCloseDeepDiveBtn.addEventListener("click", closeDeepDive);
-  }
-
-  if (deepDiveModal) {
-    deepDiveModal.addEventListener("click", (e) => {
-      if (e.target === deepDiveModal) {
-        closeDeepDive();
+  // Legacy button fallback
+  if (legacyOpenBtn) {
+    legacyOpenBtn.addEventListener("click", () => {
+      const defaultModal = document.getElementById("deep-dive-modal-17668") || document.getElementById("deep-dive-modal");
+      if (defaultModal) {
+        openModal(defaultModal);
       }
     });
   }
 
-  // Handle Escape key for both modals
+  // Setup close events for each modal
+  allModals.forEach((modal) => {
+    const closeTriggers = modal.querySelectorAll(".modal-close-trigger, .modal-close-btn, #modal-close-btn, #modal-footer-close-btn");
+    closeTriggers.forEach((trigger) => {
+      trigger.addEventListener("click", () => closeModal(modal));
+    });
+
+    // Close on backdrop click
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeModal(modal);
+      }
+    });
+  });
+
+  // Handle Escape key for all modals & lightbox
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (lightbox && lightbox.classList.contains("active")) {
         lightbox.classList.remove("active");
-        if (!isDeepDiveModalActive()) {
+        if (!hasAnyActiveModal()) {
           document.body.style.overflow = "";
         }
-      } else if (isDeepDiveModalActive()) {
-        closeDeepDive();
+      } else if (hasAnyActiveModal()) {
+        closeAllModals();
       }
     }
   });
