@@ -133,6 +133,53 @@
               </button>
             </div>
           </div>
+
+          <!-- Card 3: ioredis PR #2204 (Retry State After Manual Reconnect) -->
+          <div class="oss-card">
+            <div class="oss-header">
+              <div class="oss-brand">
+                <img src="/img/redis.png" alt="ioredis Logo" class="oss-logo" />
+                <div class="oss-title-box">
+                  <div class="oss-title-row">
+                    <h3 class="oss-title" data-i18n="oss_ioredis_title">ioredis (Redis client for Node.js)</h3>
+                    <span class="badge badge-merged"><i class="fas fa-check-circle"></i> <span data-i18n="oss_ioredis_badge_merged">Merged</span></span>
+                  </div>
+                  <a href="https://github.com/redis/ioredis/pull/2204" target="_blank" class="oss-pr-link" data-i18n="oss_ioredis_pr_link_title">
+                    PR #2204: Retry strategy silently disabled after a manual reconnect
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="oss-body">
+              <ul class="oss-summary-list">
+                <li data-i18n-html="oss_ioredis_summary_1">
+                  <strong>A retry policy that stopped retrying:</strong> Once <code>retryStrategy</code> gave up and a user called <code>connect()</code> again, the new attempt inherited the old retry count. The client gave up on its first failure: a policy configured for three retries made zero.
+                </li>
+                <li data-i18n-html="oss_ioredis_summary_2">
+                  <strong>The obvious fix would have looped forever:</strong> Automatic and manual reconnection both go through the same <code>connect()</code>, so resetting the counter there would reset it on every automatic retry too, and the client would never stop reconnecting. The fix keys off the connection state instead: it resets only when <code>connect()</code> starts from <code>end</code>, never from <code>reconnecting</code>.
+                </li>
+                <li data-i18n-html="oss_ioredis_summary_3">
+                  <strong>Same bug, second client:</strong> Found the identical pattern in <code>Cluster</code> by reading the code, then confirmed it with a failing test before fixing it. Both clients now share the same behavior, and the existing retry tests guard against the infinite-loop case.
+                </li>
+              </ul>
+            </div>
+
+            <div class="oss-footer">
+              <div class="oss-links">
+                <a href="https://github.com/redis/ioredis/pull/2204" target="_blank" class="btn-oss-link" title="GitHub PR #2204">
+                  <i class="fab fa-github"></i> PR #2204
+                </a>
+                <a href="https://github.com/redis/ioredis/issues/1463" target="_blank" class="btn-oss-link" title="GitHub Issue #1463">
+                  <i class="fas fa-exclamation-circle"></i> Issue #1463
+                </a>
+              </div>
+              <button type="button" class="btn-deep-dive" data-modal-target="#deep-dive-modal-2204">
+                <i class="fas fa-layer-group"></i>
+                <span data-i18n="btn_deep_dive">How I found it and what I changed</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -538,6 +585,111 @@
           <button type="button" class="modal-btn modal-btn-secondary modal-close-trigger" data-i18n="modal_btn_close">Close</button>
           <a href="https://github.com/nestjs/nest/pull/17668" target="_blank" class="modal-btn modal-btn-primary">
             <i class="fab fa-github"></i> PR #17668
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deep Dive Modal - ioredis PR #2204 (Retry State After Manual Reconnect) -->
+    <div id="deep-dive-modal-2204" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-2204-title-heading">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-badge-row">
+              <span class="badge badge-merged"><i class="fas fa-check-circle"></i> Merged</span>
+              <span class="badge badge-tag" data-i18n="modal_2204_badge_pr">PR #2204</span>
+              <span class="badge badge-tag" data-i18n="modal_2204_badge_issue">Issue #1463</span>
+              <span class="badge badge-author" data-i18n="modal_2204_badge_merged">Merged by Pavel Pashov</span>
+            </div>
+            <h2 id="modal-2204-title-heading" class="modal-title" data-i18n="modal_2204_title">Retry State Across a Manual Reconnect in ioredis</h2>
+            <p class="modal-subtitle" data-i18n="modal_2204_subtitle">Pull Request #2204 · Connection State Machine & Failure Recovery</p>
+            <div class="modal-fact-banner">
+              <i class="fas fa-layer-group"></i> <span data-i18n="modal_2204_fact">redis/ioredis · September 2026 · Fixed in both Redis and Cluster clients</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Section 1 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-bug"></i> <span data-i18n="modal_2204_sec1_title">1. A Retry Policy That Stopped Retrying</span>
+            </h3>
+            <p data-i18n-html="modal_2204_sec1_p1">
+              ioredis lets applications control reconnection through <code>retryStrategy(times)</code>: return a delay to retry, or <code>null</code> to give up. Once it gives up, the client moves to the <code>end</code> state, and a common recovery pattern is to call <code>connect()</code> again later, for example when the next request arrives.
+            </p>
+            <p data-i18n-html="modal_2204_sec1_p2">
+              With a policy that allows two retries, the first round behaved correctly. After a manual <code>connect()</code>, the strategy received <code>times = 4</code> on the very first failure and gave up immediately:
+            </p>
+            <pre class="modal-code-block"><code>retryStrategy: times > 2 ? null : 0
+
+before:  [1, 2, 3, 4]         // new round gives up on its first failure
+after:   [1, 2, 3, 1, 2, 3]   // manual connect() starts a new round</code></pre>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-search"></i> <span data-i18n="modal_2204_sec2_title">2. A Counter With Only One Way Back to Zero</span>
+            </h3>
+            <p data-i18n-html="modal_2204_sec2_p1">
+              The retry counter is incremented in the close handler on every disconnect and reset in exactly one place: the <code>ready</code> handler. It only returns to zero after a <em>successful</em> connection. If the server never comes back, nothing resets it, and <code>connect()</code> itself never touched it.
+            </p>
+            <div class="modal-alert-box">
+              <p data-i18n-html="modal_2204_sec2_p2">
+                The complication: automatic reconnection is not a separate code path. When the reconnect timer fires, it calls the same public <code>connect()</code> that users call.
+              </p>
+            </div>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-shield-alt"></i> <span data-i18n="modal_2204_sec3_title">3. Why the Obvious Fix Loops Forever</span>
+            </h3>
+            <p data-i18n-html="modal_2204_sec3_p1">
+              Resetting the counter unconditionally inside <code>connect()</code> would also reset it on every automatic retry. The strategy would then see <code>times = 1</code> forever, and a client configured to give up would reconnect indefinitely &mdash; a worse bug than the original.
+            </p>
+            <p data-i18n-html="modal_2204_sec3_p2">
+              The two callers are already distinguished by the connection state machine: the timer fires while the client is <code>reconnecting</code>, whereas a restart after giving up begins from <code>end</code>. The fix reads the state before it is overwritten:
+            </p>
+            <pre class="modal-code-block"><code>if (this.status === "end") {
+  this.retryAttempts = 0;
+}
+
+this.connectionEpoch += 1;
+this.setStatus("connecting");</code></pre>
+            <div class="modal-highlight-box">
+              <p data-i18n-html="modal_2204_sec3_p3">
+                An alternative was to route automatic reconnection through a separate internal method and always reset in the public one. It was rejected because <code>connect()</code> is also called internally by lazy connect, pipelines, transactions and auto-pipelining, and it wraps connection tracing &mdash; a larger change for the same outcome.
+              </p>
+            </div>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="modal-section">
+            <h3 class="modal-section-title">
+              <i class="fas fa-vial"></i> <span data-i18n="modal_2204_sec4_title">4. Same Bug, Second Client</span>
+            </h3>
+            <p data-i18n-html="modal_2204_sec4_p1">
+              <code>Cluster</code> keeps its own counter with the same increment, reset and reconnect structure. Reading it suggested the same defect, but that was only a hypothesis until a failing test reproduced <code>[1, 2, 3, 4]</code> there as well. The fix was then applied to both clients so they behave the same way.
+            </p>
+            <ul class="modal-list">
+              <li data-i18n-html="modal_2204_sec4_li1">
+                <strong>Regression tests:</strong> One per client, written first and confirmed failing against the unfixed code before the fix was applied.
+              </li>
+              <li data-i18n-html="modal_2204_sec4_li2">
+                <strong>Guard against the infinite loop:</strong> The existing tests asserting that automatic retries count <code>1 → 2 → 3</code> still pass, proving the fix does not reset the counter mid-round.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="modal-btn modal-btn-secondary modal-close-trigger" data-i18n="modal_btn_close">Close</button>
+          <a href="https://github.com/redis/ioredis/pull/2204" target="_blank" class="modal-btn modal-btn-primary">
+            <i class="fab fa-github"></i> PR #2204
           </a>
         </div>
       </div>
