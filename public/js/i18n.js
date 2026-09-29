@@ -95,6 +95,40 @@ const translations = {
     modal_sec3_li3: "<strong>Type preservation:</strong> Asserted that a string enum whose values are digit characters (<code>Digit.Zero = '0'</code>) keeps its string type and is never coerced to a number.",
     modal_sec3_p2: "NestJS creator <strong>Kamil Mysliwiec</strong> reviewed the PR and contributed a follow-up commit (<code>perf(common): memoize enum values lookup</code>) to cache enum lookups across HTTP requests, subsequently merging PR #17668 into the master branch.",
 
+    // --- PR #2204: ioredis Retry State ---
+    oss_ioredis_title: "ioredis (Redis client for Node.js)",
+    oss_ioredis_badge_merged: "Merged",
+    oss_ioredis_pr_link_title: "PR #2204: Retry strategy silently disabled after a manual reconnect",
+    oss_ioredis_summary_1: "<strong>A retry policy that stopped retrying:</strong> Once <code>retryStrategy</code> gave up and a user called <code>connect()</code> again, the new attempt inherited the old retry count. The client gave up on its first failure: a policy configured for three retries made zero.",
+    oss_ioredis_summary_2: "<strong>The obvious fix would have looped forever:</strong> Automatic and manual reconnection both go through the same <code>connect()</code>, so resetting the counter there would reset it on every automatic retry too, and the client would never stop reconnecting. The fix keys off the connection state instead: it resets only when <code>connect()</code> starts from <code>end</code>, never from <code>reconnecting</code>.",
+    oss_ioredis_summary_3: "<strong>Same bug, second client:</strong> Found the identical pattern in <code>Cluster</code> by reading the code, then confirmed it with a failing test before fixing it. Both clients now share the same behavior, and the existing retry tests guard against the infinite-loop case.",
+
+    // Deep Dive Modal - PR #2204
+    modal_2204_title: "Retry State Across a Manual Reconnect in ioredis",
+    modal_2204_subtitle: "Pull Request #2204 · Connection State Machine & Failure Recovery",
+    modal_2204_badge_pr: "PR #2204",
+    modal_2204_badge_issue: "Issue #1463",
+    modal_2204_badge_merged: "Merged by Pavel Pashov",
+    modal_2204_fact: "redis/ioredis · September 2026 · Fixed in both Redis and Cluster clients",
+
+    modal_2204_sec1_title: "1. A Retry Policy That Stopped Retrying",
+    modal_2204_sec1_p1: "ioredis lets applications control reconnection through <code>retryStrategy(times)</code>: return a delay to retry, or <code>null</code> to give up. Once it gives up, the client moves to the <code>end</code> state, and a common recovery pattern is to call <code>connect()</code> again later, for example when the next request arrives.",
+    modal_2204_sec1_p2: "With a policy that allows two retries, the first round behaved correctly. After a manual <code>connect()</code>, the strategy received <code>times = 4</code> on the very first failure and gave up immediately:",
+
+    modal_2204_sec2_title: "2. A Counter With Only One Way Back to Zero",
+    modal_2204_sec2_p1: "The retry counter is incremented in the close handler on every disconnect and reset in exactly one place: the <code>ready</code> handler. It only returns to zero after a <em>successful</em> connection. If the server never comes back, nothing resets it, and <code>connect()</code> itself never touched it.",
+    modal_2204_sec2_p2: "The complication: automatic reconnection is not a separate code path. When the reconnect timer fires, it calls the same public <code>connect()</code> that users call.",
+
+    modal_2204_sec3_title: "3. Why the Obvious Fix Loops Forever",
+    modal_2204_sec3_p1: "Resetting the counter unconditionally inside <code>connect()</code> would also reset it on every automatic retry. The strategy would then see <code>times = 1</code> forever, and a client configured to give up would reconnect indefinitely &mdash; a worse bug than the original.",
+    modal_2204_sec3_p2: "The two callers are already distinguished by the connection state machine: the timer fires while the client is <code>reconnecting</code>, whereas a restart after giving up begins from <code>end</code>. The fix reads the state before it is overwritten:",
+    modal_2204_sec3_p3: "An alternative was to route automatic reconnection through a separate internal method and always reset in the public one. It was rejected because <code>connect()</code> is also called internally by lazy connect, pipelines, transactions and auto-pipelining, and it wraps connection tracing &mdash; a larger change for the same outcome.",
+
+    modal_2204_sec4_title: "4. Same Bug, Second Client",
+    modal_2204_sec4_p1: "<code>Cluster</code> keeps its own counter with the same increment, reset and reconnect structure. Reading it suggested the same defect, but that was only a hypothesis until a failing test reproduced <code>[1, 2, 3, 4]</code> there as well. The fix was then applied to both clients so they behave the same way.",
+    modal_2204_sec4_li1: "<strong>Regression tests:</strong> One per client, written first and confirmed failing against the unfixed code before the fix was applied.",
+    modal_2204_sec4_li2: "<strong>Guard against the infinite loop:</strong> The existing tests asserting that automatic retries count <code>1 → 2 → 3</code> still pass, proving the fix does not reset the counter mid-round.",
+
     modal_btn_close: "Close",
 
     // Other Projects
@@ -225,6 +259,40 @@ const translations = {
     modal_sec3_li2: "<strong>完整列舉類型覆蓋：</strong> 涵蓋數值列舉、字串列舉、混合型列舉、負數值與包含浮點數的列舉。",
     modal_sec3_li3: "<strong>型別保全：</strong> 斷言值為數字字元的字串列舉（<code>Digit.Zero = '0'</code>）維持字串型別，不會被轉型為數值。",
     modal_sec3_p2: "PR 提交後，NestJS 創辦人 <strong>Kamil Mysliwiec</strong> 親自審查程式碼，追加了記憶化快取最佳化（<code>perf(common): memoize enum values lookup</code>）以避免每次請求重複計算列舉值，隨後順利將 PR #17668 合併至 master 分支。",
+
+    // --- PR #2204: ioredis Retry State ---
+    oss_ioredis_title: "ioredis（Node.js Redis 客戶端）",
+    oss_ioredis_badge_merged: "已合併 (Merged)",
+    oss_ioredis_pr_link_title: "PR #2204: 手動重連後，重試策略悄悄失效",
+    oss_ioredis_summary_1: "<strong>一個不再重試的重試策略：</strong> <code>retryStrategy</code> 放棄後，使用者再次呼叫 <code>connect()</code>，新的一輪會繼承舊的重試次數，第一次失敗就直接放棄。設定成重試三次的策略，實際上一次都沒有重試。",
+    oss_ioredis_summary_2: "<strong>最直覺的修法會變成無限重連：</strong> 自動重連和手動重連呼叫的是同一個 <code>connect()</code>。如果直接在裡面歸零，每次自動重試也會跟著歸零，client 就永遠不會停止重連。因此改用連線狀態判斷：只有從 <code>end</code> 狀態進入 <code>connect()</code> 才歸零，從 <code>reconnecting</code> 進入則不會。",
+    oss_ioredis_summary_3: "<strong>同一個 bug，第二個 client：</strong> 閱讀程式碼時發現 <code>Cluster</code> 有完全相同的問題，先寫出失敗的測試確認，才進行修復。兩種 client 的行為現在一致，既有的重試測試則確保不會出現無限重連。",
+
+    // Deep Dive Modal - PR #2204
+    modal_2204_title: "ioredis 手動重連時的重試狀態",
+    modal_2204_subtitle: "Pull Request #2204 · 連線狀態機與故障復原",
+    modal_2204_badge_pr: "PR #2204",
+    modal_2204_badge_issue: "Issue #1463",
+    modal_2204_badge_merged: "由 Pavel Pashov 合併",
+    modal_2204_fact: "redis/ioredis · 2026 年 9 月 · 同時修復 Redis 與 Cluster 兩種 client",
+
+    modal_2204_sec1_title: "1. 一個不再重試的重試策略",
+    modal_2204_sec1_p1: "ioredis 讓應用程式透過 <code>retryStrategy(times)</code> 控制重連：回傳延遲時間代表重試，回傳 <code>null</code> 代表放棄。放棄之後 client 會進入 <code>end</code> 狀態，常見的復原方式是稍後再呼叫一次 <code>connect()</code>，例如在下一個請求進來時。",
+    modal_2204_sec1_p2: "以允許重試兩次的策略為例，第一輪的行為完全正確。但手動呼叫 <code>connect()</code> 之後，策略在第一次失敗時就收到 <code>times = 4</code>，並立刻放棄：",
+
+    modal_2204_sec2_title: "2. 只有一條路能歸零的計數器",
+    modal_2204_sec2_p1: "重試計數器在每次斷線時由 close handler 遞增，而歸零的地方只有一個：<code>ready</code> handler。也就是說，只有<em>連線成功</em>之後才會歸零。如果伺服器一直沒有恢復，就沒有任何地方會重置它，<code>connect()</code> 本身也從來不碰它。",
+    modal_2204_sec2_p2: "麻煩的地方在於：自動重連並不是另一條獨立的路徑。重連的 timer 觸發時，呼叫的正是使用者所呼叫的同一個公開 <code>connect()</code>。",
+
+    modal_2204_sec3_title: "3. 為什麼最直覺的修法會無限重連",
+    modal_2204_sec3_p1: "如果在 <code>connect()</code> 裡無條件歸零，每次自動重試也會跟著歸零。策略看到的永遠都是 <code>times = 1</code>，原本設定會放棄的 client 就會無止盡地重連下去——比原本的 bug 更嚴重。",
+    modal_2204_sec3_p2: "連線狀態機其實已經能區分這兩種呼叫者：timer 觸發時 client 處於 <code>reconnecting</code>，而放棄後的重新開始則是從 <code>end</code> 進入。修法是在狀態被覆寫之前先讀取它：",
+    modal_2204_sec3_p3: "另一個方案是讓自動重連改走獨立的內部方法，公開的 <code>connect()</code> 則一律歸零。最後沒有採用，因為 <code>connect()</code> 在內部還會被 lazy connect、pipeline、transaction 與 auto-pipelining 呼叫，外層也包著連線 tracing——改動更大，結果卻相同。",
+
+    modal_2204_sec4_title: "4. 同一個 bug，第二個 client",
+    modal_2204_sec4_p1: "<code>Cluster</code> 有自己的計數器，遞增、歸零與重連的結構完全相同。閱讀程式碼讓我推測它也有同樣的缺陷，但在失敗的測試同樣重現出 <code>[1, 2, 3, 4]</code> 之前，這都只是假設。確認之後，才將修正同時套用到兩種 client，讓它們的行為一致。",
+    modal_2204_sec4_li1: "<strong>回歸測試：</strong> 兩種 client 各一個，先寫測試，並確認在未修正的程式碼上會失敗，才進行修正。",
+    modal_2204_sec4_li2: "<strong>防止無限重連：</strong> 既有的測試驗證自動重試會依序計數 <code>1 → 2 → 3</code>，這些測試仍然通過，證明修正不會在同一輪中途把計數歸零。",
 
     modal_btn_close: "關閉",
 
